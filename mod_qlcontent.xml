@@ -1,0 +1,730 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension
+        type="module"
+        version="3.9.12"
+        client="site"
+        method="upgrade">
+    <name>mod_qlcontent</name>
+    <author>Mareike Riegel</author>
+    <creationDate>June 2018</creationDate>
+    <copyright>ql.de. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>mareike.riegel@ql.de</authorEmail>
+    <authorUrl>ql.de</authorUrl>
+    <version>8.2.7</version>
+    <description>displays article or parts of an article or category info; also display list of articles and categories</description>
+    <updateservers>
+        <server type="extension" priority="1" name="qlcontent - Updates"><![CDATA[https://www.blackforest-software.com/_scripts/updates/mod_qlcontent.xml]]></server>
+    </updateservers>
+    <files>
+        <filename module="mod_qlcontent">mod_qlcontent.php</filename>
+        <folder>php</folder>
+        <folder>tmpl</folder>
+        <folder>language</folder>
+        <filename>helper.php</filename>
+        <filename>index.html</filename>
+        <filename>mod_qlcontent.xml</filename>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.mod_qlcontent.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.mod_qlcontent.sys.ini</language>
+        <language tag="de-DE">language/de-DE/de-DE.mod_qlcontent.ini</language>
+        <language tag="de-DE">language/de-DE/de-DE.mod_qlcontent.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+            <fieldset name="basic"
+                    addfieldpath="modules/mod_qlcontent/php/fields">
+                <field
+                        name="todo"
+                        type="list"
+                        default="1"
+                        label="MOD_QLCONTENT_TODO_LABEL"
+                        description="MOD_QLCONTENT_TODO_DESC"
+                        required="true">
+                    <option value="">JSELECT</option>
+                    <option value="11">MOD_QLCONTENT_TODO_ARTICLECURRENT</option>
+                    <option value="13">MOD_QLCONTENT_TODO_ARTICLECURRENTELSEFIXCATEGORY</option>
+                    <option value="15">MOD_QLCONTENT_TODO_ARTICLEFIX</option>
+                    <option value="17">MOD_QLCONTENT_TODO_ARTICLEFIXIFNOCURRENT</option>
+                    <option value="19">MOD_QLCONTENT_TODO_ARTICLESOFFIXCATEGORY</option>
+                    <option value="12">MOD_QLCONTENT_TODO_ARTICLEGIVEN</option>
+                    <option value="21">MOD_QLCONTENT_TODO_ARTICLESOFCURRENTCATEGORY</option>
+                    <option value="23">MOD_QLCONTENT_TODO_ARTICLESOFFIXIFNOCURRENT</option>
+                    <option value="41">MOD_QLCONTENT_TODO_CATEGORYCURRENT</option>
+                    <option value="43">MOD_QLCONTENT_TODO_CATEGORYFIX</option>
+                    <option value="45">MOD_QLCONTENT_TODO_CATEGORYFIXIFNOCURRENTARTICLE</option>
+                    <option value="47">MOD_QLCONTENT_TODO_CATEGORIESCHILDRENOFFIX</option>
+                    <option value="49">MOD_QLCONTENT_TODO_CATEGORIESCHILDRENOFCURRENT</option>
+                    <option value="50">MOD_QLCONTENT_TODO_CATEGORIESCHILDRENOFFIXIFNOCURRENT</option>
+                    <option value="51">MOD_QLCONTENT_TODO_CATEGORIESCHILDRENOFFIXIFNOCURRENTIFNOCHILDRENARTICLES</option>
+                </field>
+                <field
+                        name="articleid"
+                        type="sql"
+                        query="SELECT *, concat(`title`, ' (id', `id`,' :: ', `created`, ')') AS `title` FROM `#__content` ORDER BY `title`"
+                        key_field="id"
+                        value_field="title"
+                        default=""
+                        label="MOD_QLCONTENT_ARTICLEID_LABEL"
+                        description="MOD_QLCONTENT_ARTICLEID_DESC" >
+                </field>
+                <field
+                        name="categoryid"
+                        type="category"
+                        extension="com_content"
+                        multiple="true"
+                        default=""
+                        label="MOD_QLCONTENT_CATEGORYID_LABEL"
+                        description="MOD_QLCONTENT_CATEGORYID_DESC" >
+                    <option value="all">JALL</option>
+                </field>
+                <field name="default_use"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_ARTICLEDEFAULT_LABEL"
+                       description="MOD_QLCONTENT_ARTICLEDEFAULT_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="languageFilter"
+                       type="language"
+                       client="site"
+                       default=""
+                       label="MOD_QLCONTENT_LANGUAGE_LABEL"
+                       description="MOD_QLCONTENT_LANGUAGE_DESC">
+                    <option value="">JALL</option>
+                </field>
+                <field name="displayempty"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_EMPTY_LABEL"
+                       description="MOD_QLCONTENT_EMPTY_DESC">
+                    <option value="1">JSHOW</option>
+                    <option value="0">JHIDE</option>
+                </field>
+                <field name="showCaption"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_CAPTION_LABEL"
+                       description="MOD_QLCONTENT_CAPTION_DESC">
+                    <option value="1">JSHOW</option>
+                    <option value="0">JHIDE</option>
+                </field>
+                <field
+                        name="dateformat"
+                        type="list"
+                        default="d.m.Y"
+                        label="MOD_QLCONTENT_DATEFORMAT_LABEL"
+                        description="MOD_QLCONTENT_DATEFORMAT_DESC">
+                    <option value="Ymd">MOD_QLCONTENT_DATEFORMAT_YYYYMMDD</option>
+                    <option value="Y-m-d">MOD_QLCONTENT_DATEFORMAT_YYYY-MM-DD</option>
+                    <option value="y-m-d">MOD_QLCONTENT_DATEFORMAT_YY-MM-DD</option>
+                    <option value="d.m.Y">MOD_QLCONTENT_DATEFORMAT_DD-MM-YYYY</option>
+                    <option value="d.m.y">MOD_QLCONTENT_DATEFORMAT_DD-MM-YY</option>
+                    <option value="m/d/Y">MOD_QLCONTENT_DATEFORMAT_MM-DD-YYYY</option>
+                    <option value="m/d/y">MOD_QLCONTENT_DATEFORMAT_MM-DD-YY</option>
+                    <option value="m/d">MOD_QLCONTENT_DATEFORMAT_MM-DD</option>
+                    <option value="j.n.Y">MOD_QLCONTENT_DATEFORMAT_D-M-YYYY</option>
+                    <option value="d. F Y">MOD_QLCONTENT_DATEFORMAT_D-MONTH-YYYY</option>
+                    <option value="j. F Y">MOD_QLCONTENT_DATEFORMAT_DD-MONTH-YYYY</option>
+                    <option value="l, j. F Y">MOD_QLCONTENT_DATEFORMAT_DAY-D-MONTH-YYYY</option>
+                    <option value="l, d.m.Y">MOD_QLCONTENT_DATEFORMAT_DAY-DD-MM-YYYY</option>
+                </field>
+                <field name="titletag"
+                       type="list"
+                       label="MOD_QLCONTENT_TITLETAG_LABEL"
+                       description="MOD_QLCONTENT_TITLETAG_DESC"
+                       default="h3">
+                    <option value="h1">h1</option>
+                    <option value="h2">h2</option>
+                    <option value="h3">h3</option>
+                    <option value="h4">h4</option>
+                    <option value="h5">h5</option>
+                    <option value="h6">h6</option>
+                    <option value="div">div</option>
+                    <option value="span">span</option>
+                    <option value="strong">strong</option>
+                    <option value="em">em</option>
+                </field>
+            </fieldset>
+            <fieldset name="qlarticle1">
+                <field name="art_position1" type="article" default="title" label="MOD_QLCONTENT_POSITION1_LABEL" description="MOD_QLCONTENT_POSITION1_DESC"></field>
+                <field name="art_position2" type="article" default="introtext" label="MOD_QLCONTENT_POSITION2_LABEL" description="MOD_QLCONTENT_POSITION2_DESC"></field>
+                <field name="art_position3" type="article" default="0" label="MOD_QLCONTENT_POSITION3_LABEL" description="MOD_QLCONTENT_POSITION3_DESC"> </field>
+                <field name="art_position4" type="article" default="0" label="MOD_QLCONTENT_POSITION4_LABEL" description="MOD_QLCONTENT_POSITION4_DESC"> </field>
+                <field name="art_position5" type="article" default="0" label="MOD_QLCONTENT_POSITION5_LABEL" description="MOD_QLCONTENT_POSITION5_DESC"> </field>
+                <field name="art_position6" type="article" default="0" label="MOD_QLCONTENT_POSITION6_LABEL" description="MOD_QLCONTENT_POSITION6_DESC"> </field>
+                <field name="art_position7" type="article" default="0" label="MOD_QLCONTENT_POSITION7_LABEL" description="MOD_QLCONTENT_POSITION7_DESC"> </field>
+                <field name="art_position8" type="article" default="0" label="MOD_QLCONTENT_POSITION8_LABEL" description="MOD_QLCONTENT_POSITION8_DESC"> </field>
+                <field name="art_position9" type="article" default="0" label="MOD_QLCONTENT_POSITION9_LABEL" description="MOD_QLCONTENT_POSITION9_DESC"> </field>
+                <field name="art_position10" type="article" default="0" label="MOD_QLCONTENT_POSITION10_LABEL" description="MOD_QLCONTENT_POSITION10_DESC"> </field>
+                <field name="art_position11" type="article" default="0" label="MOD_QLCONTENT_POSITION11_LABEL" description="MOD_QLCONTENT_POSITION11_DESC"> </field>
+                <field name="art_position12" type="article" default="0" label="MOD_QLCONTENT_POSITION12_LABEL" description="MOD_QLCONTENT_POSITION12_DESC"> </field>
+                <field name="art_position13" type="article" default="0" label="MOD_QLCONTENT_POSITION13_LABEL" description="MOD_QLCONTENT_POSITION13_DESC"> </field>
+                <field name="art_position14" type="article" default="0" label="MOD_QLCONTENT_POSITION14_LABEL" description="MOD_QLCONTENT_POSITION14_DESC"> </field>
+                <field name="art_position15" type="article" default="0" label="MOD_QLCONTENT_POSITION15_LABEL" description="MOD_QLCONTENT_POSITION15_DESC"> </field>
+                <field name="art_position16" type="article" default="0" label="MOD_QLCONTENT_POSITION16_LABEL" description="MOD_QLCONTENT_POSITION16_DESC"> </field>
+                <field name="art_position17" type="article" default="0" label="MOD_QLCONTENT_POSITION17_LABEL" description="MOD_QLCONTENT_POSITION17_DESC"> </field>
+            </fieldset>
+            <fieldset name="qlarticle2">
+                <field name="link_titles"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_LINKTITLES_LABEL"
+                       description="MOD_QLCONTENT_LINKTITLES_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                        name="readmoretext"
+                        type="text"
+                        default="Read more"
+                        label="MOD_QLCONTENT_READMORETEXT_LABEL"
+                        description="MOD_QLCONTENT_READMORETEXT_DESC">
+                </field>
+                <field name="readmoredisplay"
+                       type="list"
+                       default="0"
+                       label="MOD_QLCONTENT_READMOREDISPLAY_LABEL"
+                       description="MOD_QLCONTENT_READMOREDISPLAY_DESC">
+                    <option value="0">MOD_QLCONTENT_READMOREDISPLAY_WHENNEEDED</option>
+                    <option value="1">MOD_QLCONTENT_READMOREDISPLAY_ALWAYS</option>
+                </field>
+                <field name="dots"
+                       type="list"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_DOTS_LABEL"
+                       description="MOD_QLCONTENT_DOTS_DESC">
+                    <option value="0">JNO</option>
+                    <option value="1">MOD_QLCONTENT_READMOREDISPLAY_WHENNEEDED</option>
+                    <option value="2">MOD_QLCONTENT_READMOREDISPLAY_ALWAYS</option>
+                </field>
+                <field name="prepareContent"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_PREPARECONTENT_LABEL"
+                       description="MOD_QLCONTENT_PREPARECONTENT_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="showBackButton"
+                       type="list"
+                       default="0"
+                       label="MOD_QLCONTENT_BACKBUTTON_LABEL"
+                       description="MOD_QLCONTENT_BACKBUTTON_DESC">
+                    <option value="0">JNO</option>
+                    <option value="1">MOD_QLCONTENT_POSITIONTOP</option>
+                    <option value="2">MOD_QLCONTENT_POSITIONBOTTOM</option>
+                    <option value="3">MOD_QLCONTENT_POSITIONTOPBOTTOM</option>
+                </field>
+            </fieldset>
+            <fieldset name="qlarticle3">
+                <field name="state"
+                       type="list"
+                       default="1"
+                       label="MOD_QLCONTENT_STATE_LABEL"
+                       description="MOD_QLCONTENT_STATE_DESC">
+                    <option value="1">JPUBLISHED</option>
+                    <option value="0">JUNPUBLISHED</option>
+                    <option value="2">JARCHIVED</option>
+                    <option value="-2">JTRASHED</option>
+                </field>
+                <field name="featured"
+                       type="list"
+                       default="2"
+                       label="MOD_QLCONTENT_FEATURED_LABEL"
+                       description="MOD_QLCONTENT_FEATURED_DESC">
+                    <option value="2">MOD_QLCONTENT_FEATURED_BOTH</option>
+                    <option value="1">MOD_QLCONTENT_FEATURED_ONLY</option>
+                    <option value="0">MOD_QLCONTENT_FEATURED_NONE</option>
+                </field>
+                <field name="count"
+                       type="text"
+                       default="1000"
+                       label="MOD_QLCONTENT_COUNT_LABEL"
+                       description="MOD_QLCONTENT_COUNT_DESC"
+                       pattern="([0-9]+)">
+                </field>
+                <field name="ordering"
+                       type="list"
+                       default="0"
+                       label="MOD_QLCONTENT_ORDERING_LABEL"
+                       description="MOD_QLCONTENT_ORDERING_DESC">
+                    <option value="con.id">MOD_QLCONTENT_ID</option>
+                    <option value="con.title">MOD_QLCONTENT_TITLE</option>
+                    <option value="con.publish_up">MOD_QLCONTENT_PUBLISH_UP</option>
+                    <option value="con.created">MOD_QLCONTENT_CREATED</option>
+                    <option value="con.modified">MOD_QLCONTENT_MODIFIED</option>
+                    <option value="con.ordering">MOD_QLCONTENT_ORDERING</option>
+                    <option value="con.featured">MOD_QLCONTENT_FEATURED</option>
+                </field>
+                <field name="orderingdirection"
+                       type="list"
+                       default="desc"
+                       label="MOD_QLCONTENT_ORDERINGDIRECTION_LABEL"
+                       description="MOD_QLCONTENT_ORDERINGDIRECTION_DESC">
+                    <option value="asc">MOD_QLCONTENT_ORDERINGDIRECTIONASC</option>
+                    <option value="desc">MOD_QLCONTENT_ORDERINGDIRECTIONDESC</option>
+                </field>
+                <field name="itemsClass"
+                       type="text"
+                       default=""
+                       label="MOD_QLCONTENT_ITEMSCLASS_LABEL"
+                       description="MOD_QLCONTENT_ITEMSCLASS_DESC">
+                </field>
+                <field name="itemClass"
+                       type="text"
+                       default="col-xs-12 col-md-6"
+                       label="MOD_QLCONTENT_ITEMCLASS_LABEL"
+                       description="MOD_QLCONTENT_ITEMCLASS_DESC">
+                </field>
+                <field name="cutintrotext"
+                       type="text"
+                       class=""
+                       default="0"
+                       filter="integer"
+                       label="MOD_QLCONTENT_CUTINTROTEXTCOUNT_LABEL"
+                       description="MOD_QLCONTENT_CUTINTROTEXTCOUNT_DESC" >
+                </field>
+                <field name="cutintrotextunit"
+                       type="list"
+                       default="chars"
+                       label="MOD_QLCONTENT_CUTINTROTEXTUNIT_DESC"
+                       description="MOD_QLCONTENT_CUTINTROTEXTUNIT_DESC" >
+                    <option value="words">MOD_QLCONTENT_CUTINTROTEXTUNIT_WORDS</option>
+                    <option value="chars">MOD_QLCONTENT_CUTINTROTEXTUNIT_CHARS</option>
+                </field>
+                <field name="striptags"
+                       type="radio"
+                       default="0"
+                       class="btn-group"
+                       label="MOD_QLCONTENT_STRIPTAGS_LABEL"
+                       description="MOD_QLCONTENT_STRIPTAGS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+            <fieldset name="qlarticle4">
+                <field name="default_art_position1"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION1_LABEL"
+                       description="MOD_QLCONTENT_POSITION1_DESC">
+                </field>
+                <field name="default_art_position2"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION2_LABEL"
+                       description="MOD_QLCONTENT_POSITION2_DESC">
+                </field>
+                <field name="default_art_position3"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION3_LABEL"
+                       description="MOD_QLCONTENT_POSITION3_DESC">
+                </field>
+                <field name="default_art_position4"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION4_LABEL"
+                       description="MOD_QLCONTENT_POSITION4_DESC">
+                </field>
+                <field name="default_art_position5"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION5_LABEL"
+                       description="MOD_QLCONTENT_POSITION5_DESC">
+                </field>
+                <field name="default_art_position6"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION6_LABEL"
+                       description="MOD_QLCONTENT_POSITION6_DESC">
+                </field>
+                <field name="default_art_position7"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION7_LABEL"
+                       description="MOD_QLCONTENT_POSITION7_DESC">
+                </field>
+                <field name="default_art_position8"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION8_LABEL"
+                       description="MOD_QLCONTENT_POSITION8_DESC">
+                </field>
+                <field name="default_art_position9"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION9_LABEL"
+                       description="MOD_QLCONTENT_POSITION9_DESC">
+                </field>
+                <field name="default_art_position10"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION10_LABEL"
+                       description="MOD_QLCONTENT_POSITION10_DESC">
+                </field>
+                <field name="default_art_position11"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION11_LABEL"
+                       description="MOD_QLCONTENT_POSITION1_DESC">
+                </field>
+                <field name="default_art_position12"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION12_LABEL"
+                       description="MOD_QLCONTENT_POSITION12_DESC">
+                </field>
+                <field name="default_art_position13"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION13_LABEL"
+                       description="MOD_QLCONTENT_POSITION13_DESC">
+                </field>
+                <field name="default_art_position14"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION14_LABEL"
+                       description="MOD_QLCONTENT_POSITION14_DESC">
+                </field>
+                <field name="default_art_position15"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION15_LABEL"
+                       description="MOD_QLCONTENT_POSITION15_DESC">
+                </field>
+                <field name="default_art_position16"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION16_LABEL"
+                       description="MOD_QLCONTENT_POSITION16_DESC">
+                </field>
+                <field name="default_art_position17"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION17_LABEL"
+                       description="MOD_QLCONTENT_POSITION17_DESC">
+                </field>
+            </fieldset>
+            <fieldset name="qlcategory1">
+                <field name="cat_position1" type="qlcategory" default="title" label="MOD_QLCONTENT_POSITION1_LABEL" description="MOD_QLCONTENT_POSITION1_DESC" />
+                <field name="cat_position2" type="qlcategory" default="description" label="MOD_QLCONTENT_POSITION2_LABEL" description="MOD_QLCONTENT_POSITION2_DESC" />
+                <field name="cat_position3" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION3_LABEL" description="MOD_QLCONTENT_POSITION3_DESC" />
+                <field name="cat_position4" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION4_LABEL" description="MOD_QLCONTENT_POSITION4_DESC" />
+                <field name="cat_position5" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION5_LABEL" description="MOD_QLCONTENT_POSITION5_DESC" />
+                <field name="cat_position6" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION6_LABEL" description="MOD_QLCONTENT_POSITION6_DESC" />
+                <field name="cat_position7" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION7_LABEL" description="MOD_QLCONTENT_POSITION7_DESC" />
+                <field name="cat_position8" type="qlcategory" default="0" label="MOD_QLCONTENT_POSITION8_LABEL" description="MOD_QLCONTENT_POSITION8_DESC" />
+            </fieldset><fieldset name="qlcategory2">
+                <field name="link_category"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_LINKCATEGORY_LABEL"
+                       description="MOD_QLCONTENT_LINKCATEGORY_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+            <fieldset name="qlcategory3">
+            <field
+                    name="statecategory"
+                    type="list"
+                    default="1"
+                    label="MOD_QLCONTENT_STATE_LABEL"
+                    description="MOD_QLCONTENT_STATE_DESC">
+                <option value="1">JPUBLISHED</option>
+                <option value="0">JUNPUBLISHED</option>
+                <option value="2">JARCHIVED</option>
+                <option value="-2">JTRASHED</option>
+            </field>
+            <field
+                    name="countcategory"
+                    type="text"
+                    default="5"
+                    filter="integer"
+                    label="MOD_QLCONTENT_COUNT_LABEL"
+                    description="MOD_QLCONTENT_COUNT_DESC" >
+            </field>
+                <field name="cattitletag"
+                       type="list"
+                       label="MOD_QLCONTENT_TITLETAG_LABEL"
+                       description="MOD_QLCONTENT_TITLETAG_DESC"
+                       default="h3">
+                    <option value="h1">h1</option>
+                    <option value="h2">h2</option>
+                    <option value="h3">h3</option>
+                    <option value="h4">h4</option>
+                    <option value="h5">h5</option>
+                    <option value="h6">h6</option>
+                    <option value="div">div</option>
+                    <option value="span">span</option>
+                    <option value="strong">strong</option>
+                    <option value="em">em</option>
+                </field>
+
+            <field
+                    name="orderingcategory"
+                    type="list"
+                    default="0"
+                    label="MOD_QLCONTENT_ORDERINGCATEGORY_LABEL"
+                    description="MOD_QLCONTENT_ORDERINGCATEGORY_DESC">
+                <option value="cat.title">MOD_QLCONTENT_TITLE</option>
+                <option value="cat.published">MOD_QLCONTENT_PUBLISH_UP</option>
+                <option value="cat.created_time">MOD_QLCONTENT_CREATED</option>
+                <option value="cat.modified_time">MOD_QLCONTENT_MODIFIED</option>
+            </field>
+            <field
+                    name="orderingcategorydirection"
+                    type="list"
+                    default="desc"
+                    label="MOD_QLCONTENT_ORDERINGCATEGORYDIRECTION_LABEL"
+                    description="MOD_QLCONTENT_ORDERINGCATEGORYDIRECTION_DESC">
+                <option value="asc">MOD_QLCONTENT_ORDERINGDIRECTIONASC</option>
+                <option value="desc">MOD_QLCONTENT_ORDERINGDIRECTIONDESC</option>
+            </field>
+                <field name="catcutintrotext"
+                       type="text"
+                       class=""
+                       default="0"
+                       filter="integer"
+                       label="MOD_QLCONTENT_CUTINTROTEXTCOUNT_LABEL"
+                       description="MOD_QLCONTENT_CUTINTROTEXTCOUNT_DESC" >
+                </field>
+                <field name="catcutintrotextunit"
+                       type="list"
+                       default="chars"
+                       label="MOD_QLCONTENT_CUTINTROTEXTUNIT_DESC"
+                       description="MOD_QLCONTENT_CUTINTROTEXTUNIT_DESC" >
+                    <option value="words">MOD_QLCONTENT_CUTINTROTEXTUNIT_WORDS</option>
+                    <option value="chars">MOD_QLCONTENT_CUTINTROTEXTUNIT_CHARS</option>
+                </field>
+                <field name="catstriptags"
+                       type="radio"
+                       default="0"
+                       class="btn-group"
+                       label="MOD_QLCONTENT_STRIPTAGS_LABEL"
+                       description="MOD_QLCONTENT_STRIPTAGS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+        </fieldset>
+            <fieldset name="qlcategory4">
+                <field name="default_cat_position1"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION1_LABEL"
+                       description="MOD_QLCONTENT_POSITION1_DESC">
+                </field>
+                <field name="default_cat_position2"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION2_LABEL"
+                       description="MOD_QLCONTENT_POSITION2_DESC">
+                </field>
+                <field name="default_cat_position3"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION3_LABEL"
+                       description="MOD_QLCONTENT_POSITION3_DESC">
+                </field>
+                <field name="default_cat_position4"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION4_LABEL"
+                       description="MOD_QLCONTENT_POSITION4_DESC">
+                </field>
+                <field name="default_cat_position5"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION5_LABEL"
+                       description="MOD_QLCONTENT_POSITION5_DESC">
+                </field>
+                <field name="default_cat_position6"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION6_LABEL"
+                       description="MOD_QLCONTENT_POSITION6_DESC">
+                </field>
+                <field name="default_cat_position7"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION7_LABEL"
+                       description="MOD_QLCONTENT_POSITION7_DESC">
+                </field>
+                <field name="default_cat_position8"
+                       type="text"
+                       label="MOD_QLCONTENT_POSITION8_LABEL"
+                       description="MOD_QLCONTENT_POSITION8_DESC">
+                </field>
+            </fieldset>
+            <fieldset name="message">
+                <field name="boolEmptyMessage"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_MESSAGEWHENEMPTY_LABEL"
+                       description="MOD_QLCONTENT_MESSAGEWHENEMPTY_DESC">
+                    <option value="1">JSHOW</option>
+                    <option value="0">JHIDE</option>
+                </field>
+                <field name="strEmptyMessage"
+                type="editor"
+                default=""
+                label="MOD_QLCONTENT_MESSAGECONTENT_LABEL"
+                description="MOD_QLCONTENT_MESSAGE_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="strMessageClass"
+                       type="text"
+                       default=""
+                       hint="alert alert-warning"
+                       label="MOD_QLCONTENT_MESSAGECLASS_LABEL"
+                       description="MOD_QLCONTENT_MESSAGECLASS_DESC">
+                </field>
+            </fieldset>
+            <fieldset name="pagination">
+                <field
+                        name="pagination"
+                        type="list"
+                        default="0"
+                        label="MOD_QLCONTENT_PAGINATION_LABEL"
+                        description="MOD_QLCONTENT_PAGINATION_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                        name="pagination_limit"
+                        type="text"
+                        default="4"
+                        label="MOD_QLCONTENT_PAGINATIONLIMIT_LABEL"
+                        description="MOD_QLCONTENT_PAGINATIONLIMIT_DESC"
+                        pattern="([0-9]+)">
+                </field>
+                <!--field
+                        name="pagination_limit"
+                        type="list"
+                        default="5"
+                        label="MOD_QLCONTENT_PAGINATIONLIMIT_LABEL"
+                        description="MOD_QLCONTENT_PAGINATIONLIMIT_DESC">
+                    <option value="5"></option>
+                    <option value="10"></option>
+                    <option value="15"></option>
+                    <option value="20"></option>
+                    <option value="25"></option>
+                    <option value="30"></option>
+                    <option value="50"></option>
+                    <option value="100"></option>
+                    <option value="0">JALL</option>
+                </field-->
+                <field
+                        name="pagination"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="MOD_QLCONTENT_PAGINATION_LABEL"
+                        description="MOD_QLCONTENT_PAGINATION_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                        name="pagination_boxposition"
+                        type="list"
+                        default="1"
+                        label="MOD_QLCONTENT_PAGINATIONBOXPOSITION_LABEL"
+                        description="MOD_QLCONTENT_PAGINATIONBOXPOSITION_DESC">
+                    <option value="0">JNO</option>
+                    <option value="1">MOD_QLCONTENT_PAGINATIONABOVE</option>
+                    <option value="2">MOD_QLCONTENT_PAGINATIONBELOW</option>
+                    <option value="3">MOD_QLCONTENT_PAGINATIONABOVENBELOW</option>
+                </field>
+                <field
+                        name="pagination_resultposition"
+                        type="list"
+                        default="1"
+                        label="MOD_QLCONTENT_PAGINATIONRESULTPOSITION_LABEL"
+                        description="MOD_QLCONTENT_PAGINATIONRESULTPOSITION_DESC">
+                    <option value="0">JNO</option>
+                    <option value="1">MOD_QLCONTENT_PAGINATIONABOVE</option>
+                    <option value="2">MOD_QLCONTENT_PAGINATIONBELOW</option>
+                    <option value="3">MOD_QLCONTENT_PAGINATIONABOVENBELOW</option>
+                </field>
+                <field
+                        name="pagination_pagesposition"
+                        type="list"
+                        default="2"
+                        label="MOD_QLCONTENT_PAGINATIONPAGESPOSITION_LABEL"
+                        description="MOD_QLCONTENT_PAGINATIONPAGESPOSITION_DESC">
+                    <option value="0">JNO</option>
+                    <option value="1">MOD_QLCONTENT_PAGINATIONABOVE</option>
+                    <option value="2">MOD_QLCONTENT_PAGINATIONBELOW</option>
+                    <option value="3">MOD_QLCONTENT_PAGINATIONABOVENBELOW</option>
+                </field>
+
+            </fieldset>
+
+            <fieldset
+                    name="admin">
+                <field
+                        name="showposition"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="MOD_QLCONTENT_POSITION_LABEL"
+                        description="MOD_QLCONTENT_POSITION_DESC">
+                    <option value="1">JSHOW</option>
+                    <option value="0">JHIDE</option>
+                </field>
+                <field
+                        name="showlabels"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="MOD_QLCONTENT_LABELS_LABEL"
+                        description="MOD_QLCONTENT_LABELS_DESC">
+                    <option value="1">JSHOW</option>
+                    <option value="0">JHIDE</option>
+                </field>
+
+                <field name="checkToken"
+                       type="radio"
+                       class="btn-group"
+                       default="0"
+                       label="MOD_QLCONTENT_CHECKTOKEN_LABEL"
+                       description="MOD_QLCONTENT_CHECKTOKEN_DESC">
+                    <option value="post">MOD_QLCONTENT_CHECKTOKEN_POST</option>
+                    <option value="get">MOD_QLCONTENT_CHECKTOKEN_GET</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+            <fieldset
+                    name="advanced">
+
+                <field
+                        name="layout"
+                        type="modulelayout"
+                        default="default"
+                        label="JFIELD_ALT_LAYOUT_LABEL"
+                        description="JFIELD_ALT_MODULE_LAYOUT_DESC" />
+
+                <field
+                        name="moduleclass_sfx"
+                        type="text"
+                        label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+                        description="COM_MODULES_FIELD_MODULECLASS_SFX_DESC" />
+
+                <field
+                        name="cache"
+                        type="list"
+                        default="1"
+                        label="COM_MODULES_FIELD_CACHING_LABEL"
+                        description="COM_MODULES_FIELD_CACHING_DESC">
+                    <option
+                            value="1">JGLOBAL_USE_GLOBAL</option>
+                    <option
+                            value="0">COM_MODULES_FIELD_VALUE_NOCACHING</option>
+                </field>
+
+                <field
+                        name="cache_time"
+                        type="text"
+                        default="900"
+                        label="COM_MODULES_FIELD_CACHE_TIME_LABEL"
+                        description="COM_MODULES_FIELD_CACHE_TIME_DESC" />
+                <field
+                        name="cachemode"
+                        type="hidden"
+                        default="static">
+                    <option
+                            value="static"></option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+</extension>
