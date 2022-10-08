@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension
         type="module"
-        version="3.9.12"
+        version="3.10.0"
         client="site"
         method="upgrade">
     <name>mod_qlcontent</name>
     <author>Mareike Riegel</author>
-    <creationDate>June 2018</creationDate>
+    <creationDate>Octibre 2022</creationDate>
     <copyright>ql.de. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mareike.riegel@ql.de</authorEmail>
     <authorUrl>ql.de</authorUrl>
-    <version>8.2.7</version>
+    <version>3.10.0</version>
     <description>displays article or parts of an article or category info; also display list of articles and categories</description>
     <updateservers>
-        <server type="extension" priority="1" name="qlcontent - Updates"><![CDATA[https://www.blackforest-software.com/_scripts/updates/mod_qlcontent.xml]]></server>
+        <server type="extension" priority="1" name="qlcontent - Updates">https://github.com/hoochicken/mod_qlcontent/archive/refs/tags/v3.10.0.zip</server>
     </updateservers>
     <files>
         <filename module="mod_qlcontent">mod_qlcontent.php</filename>
