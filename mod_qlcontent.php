@@ -309,7 +309,7 @@ if (isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 < count($arrItems
         $arrItemsOrdered = $obj_helper->addPagination($arrItemsOrdered, $params);
         $pagination = $obj_helper->pagination;
     }
-    $moduleclass_sfx = htmlspecialchars($params->get('moduleclass_sfx'));
+    $moduleclass_sfx = !empty($params->get('moduleclass_sfx')) ? htmlspecialchars($params->get('moduleclass_sfx')) : '';
     require JModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
 } elseif(1 == $params->get('boolEmptyMessage', 0) && isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 === count($arrItems)) {
     require JModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_message');
