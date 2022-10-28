@@ -15,3 +15,4 @@ if (!isset($strField))return;
 		<a target="<?php echo $dataOfItems[$arrItem->id]->{$strField.'target'};?>" class="<?php echo $dataOfItems[$arrItem->id]->{$strField.'class'};?>" rel="<?php echo $dataOfItems[$arrItem->id]->{$strField.'rel'};?>" href="<?php echo $arrItem->$strField;?>"><?php echo $dataOfItems[$arrItem->id]->{$strField.'text'};?></a>
 	</div>
 <?php unset($target);?>
+

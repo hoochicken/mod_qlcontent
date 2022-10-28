@@ -1,8 +1,8 @@
 <?php
 /**
  * @package        mod_qlcontent
- * @copyright    Copyright (C) 2022 ql.de All rights reserved.
- * @author        Mareike Riegel mareike.riegel@ql.de
+ * @copyright      Copyright (C) 2022 ql.de All rights reserved.
+ * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -599,5 +599,4 @@ class modQlcontentHelper
         }
         return $rowCount;
     }
-
 }
