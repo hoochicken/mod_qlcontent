@@ -599,5 +599,4 @@ class modQlcontentHelper
         }
         return $rowCount;
     }
-
 }

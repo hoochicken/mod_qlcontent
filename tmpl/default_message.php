@@ -10,10 +10,3 @@
     <?php echo $params->get('strEmptyMessage', ''); ?>
 </div>
 <?php
-
-
-
-
-
-
-

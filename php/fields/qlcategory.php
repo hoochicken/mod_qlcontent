@@ -79,5 +79,3 @@ class JFormFieldQLcategory extends JFormField
     }
 
 }
-
-?>

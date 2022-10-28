@@ -18,3 +18,4 @@ if (''!=$dataOfItems[$arrItem->id]->fulltext OR 1==$params->get('readmoredisplay
 		</a>
 	</div>
 <?php endif; ?>
+

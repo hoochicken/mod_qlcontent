@@ -25,3 +25,4 @@ $strTitleTag = $params->get('cattitletag', 'h3');
     } ?>
     </<?php echo $strTitleTag; ?>>
 <?php endif; ?>
+

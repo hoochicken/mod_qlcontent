@@ -91,5 +91,3 @@ class JFormFieldArticle extends JFormField
     }
 
 }
-
-?>

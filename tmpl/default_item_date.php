@@ -16,3 +16,4 @@ $date = JHtml::_('date', $arrItem->$strField, $params->get('dateformat')); ?>
         <?php echo $date; ?>
     </div>
 <?php unset($date); ?>
+
