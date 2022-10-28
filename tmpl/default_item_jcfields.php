@@ -1,9 +1,9 @@
 <?php
 /**
- * @package		mod_qlcontent
- * @copyright	Copyright (C) 2017 ql.de All rights reserved.
- * @author 		Mareike Riegel mareike.riegel@ql.de
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package        mod_qlcontent
+ * @copyright      Copyright (C) 2017 ql.de All rights reserved.
+ * @author         Mareike Riegel mareike.riegel@ql.de
+ * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // no direct access
@@ -11,9 +11,9 @@ defined('_JEXEC') or die;
 
 ?>
 <?php if (isset($strField)) : ?>
-	<div class="<?php echo $strField; ?>">
+    <div class="<?php echo $strField; ?>">
         <?php foreach ($arrItem->$strField as $numKey => $objValue) {
             echo FieldsHelper::render($objValue->context, 'field.render', array('field' => $objValue));
         } ?>
-	</div>
+    </div>
 <?php endif; ?>

@@ -7,8 +7,6 @@
  */
 
 ?>
-
-
 <div class="pagination paginationResult">
     <?php echo $pagination->getResultsCounter();?>
 </div>
