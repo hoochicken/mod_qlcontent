@@ -102,7 +102,11 @@ class modQlcontentHelper
             $query .= 'AND (';
             $query .= '(con.publish_up <' . $date . ' AND con.publish_down =\'0000-00-00 00:00:00\')';
             $query .= ' OR ';
+            $query .= '(con.publish_up <' . $date . ' AND con.publish_down IS NULL)';
+            $query .= ' OR ';
             $query .= '(con.publish_up <' . $date . ' AND con.publish_down >' . $date . ')';
+            $query .= ' OR ';
+            $query .= '(con.publish_up IS NULL AND con.publish_down >' . $date . ')';
             $query .= ')';
         }
         $this->state = $query;
@@ -538,14 +542,22 @@ class modQlcontentHelper
         if (isset($objItem->fulltext)) {
             $objItem->text .= $objItem->fulltext;
         }
-        $dispatcher = JEventDispatcher::getInstance();
         $params = new JRegistry($objItem);
-        $dispatcher->trigger('onContentPrepare', array('com_content.article', &$objItem, &$params, 0));
+        $arrParamsDispatcher = ['com_content.article', &$objItem, &$params, 0];
+
+        if (version_compare(4, JVERSION, '<=')) {
+            $dispatcher = Joomla\CMS\Factory::getApplication()->getDispatcher();
+            $event = new Joomla\Event\Event('onContentPrepare', $arrParamsDispatcher);
+            $res = $dispatcher->dispatch('onCheckAnswer', $event);
+        } else {
+            $dispatcher = JEventDispatcher::getInstance();
+            $dispatcher->trigger('onContentPrepare', $arrParamsDispatcher);
+        }
         $objItem->introtext = $objItem->text;
         unset($objItem->text);
         return $objItem;
     }
-
+    
     /**
      * method to prepare content
      * @param string string to be cut
