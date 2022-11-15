@@ -7,7 +7,7 @@ E. g. you can show the fulltext image and/or url etc. in the sidebar while artic
 ## What about a coffee ..
 
 I love coding. My extensions are for free. Wanna say thanks? You're welcome! 
-<https://www.buymeacoffee.com/mareikeRiegel>
+<a href="https://www.buymeacoffee.com/mareikeRiegel">https://www.buymeacoffee.com/mareikeRiegel</a>
 
 ## Display
 
