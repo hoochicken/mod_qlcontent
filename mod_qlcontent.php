@@ -125,7 +125,7 @@ switch ($numTodo) {
     /*category:: current category of article(s)*/
     case 41:
         $arrCatid = $obj_helper->getCurrentArticle('catid');
-		if (is_array($arrCatid) && count($arrCatid) <= 0 || '' == $arrCatid[0]) {
+		if (empty($arrCatid) || (is_array($arrCatid) && count($arrCatid) <= 0) || empty($arrCatid[0])) {
             $arrCatid = [0 => $obj_helper->getCurrentCategory('id')];
         }
 		if (0 < count($arrCatid)) {
