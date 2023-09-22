@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension
         type="module"
-        version="9.0.0"
+        version="9.0.1"
         client="site"
         method="upgrade">
     <name>mod_qlcontent</name>
     <author>Mareike Riegel</author>
-    <creationDate>Octobre 2022</creationDate>
+    <creationDate>Octobre 2023</creationDate>
     <copyright>ql.de. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mareike.riegel@ql.de</authorEmail>
     <authorUrl>ql.de</authorUrl>
-    <version>9.0.0</version>
+    <version>9.0.1</version>
     <description>displays article or parts of an article or category info; also display list of articles and categories</description>
     <updateservers>
         <server type="extension" priority="1" name="qlcontent - Updates">https://raw.githubusercontent.com/hoochicken/mod_qlcontent/master/_jupdate/mod_qlcontent.xml</server>
@@ -198,6 +198,10 @@
                     <option value="0">MOD_QLCONTENT_READMOREDISPLAY_WHENNEEDED</option>
                     <option value="1">MOD_QLCONTENT_READMOREDISPLAY_ALWAYS</option>
                 </field>
+                <field name="readmoreClass"
+                       default="btn btn-secondary"
+                       label="MOD_QLCONTENT_READMORECLASS_LABEL"
+                       description="MOD_QLCONTENT_READMORECLASS_DESC" />
                 <field name="dots"
                        type="list"
                        class="btn-group"

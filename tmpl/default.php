@@ -7,6 +7,8 @@
  */
 
 JLoader::register('FieldsHelper', JPATH_ADMINISTRATOR . '/components/com_fields/helpers/fields.php');
+
+/** @var Joomla\Registry\Registry $params */
 // no direct access
 defined('_JEXEC') || die; ?>
 <div class="qlcontent <?php echo $moduleclass_sfx; ?>">
