@@ -14,7 +14,7 @@ if (''!=$dataOfItems[$arrItem->id]->fulltext OR 1==$params->get('readmoredisplay
 	<div class="<?php echo $strField; ?>">
         <?php require JModuleHelper::getLayoutPath('mod_qlcontent','default_item_showposition'); ?>
 		<a class="<?php echo $params->get('readmoreClass', 'btn btn-secondary'); ?>" href="<?php echo $dataOfItems[$arrItem->id]->link; ?>">
-			<span class="icon-chevron-right"></span> <?php echo JText::_($arrItem->readmore);?>
+			<?php echo JText::_($arrItem->readmore);?>
 		</a>
 	</div>
 <?php endif; ?>
