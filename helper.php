@@ -7,6 +7,8 @@
  */
 
 // no direct access
+use Joomla\CMS\Event\Content\ContentPrepareEvent;
+
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.model');
@@ -545,7 +547,11 @@ class modQlcontentHelper
         $params = new JRegistry($objItem);
         $arrParamsDispatcher = ['com_content.article', &$objItem, &$params, 0];
 
-        if (version_compare(4, JVERSION, '<=')) {
+        if (version_compare(5, JVERSION, '<=')) {
+            $dispatcher = Joomla\CMS\Factory::getApplication()->getDispatcher();
+            $event = new ContentPrepareEvent('onContentPrepare', $arrParamsDispatcher);
+            $res = $dispatcher->dispatch('onCheckAnswer', $event);
+        } elseif (version_compare(4, JVERSION, '<=')) {
             $dispatcher = Joomla\CMS\Factory::getApplication()->getDispatcher();
             $event = new Joomla\Event\Event('onContentPrepare', $arrParamsDispatcher);
             $res = $dispatcher->dispatch('onCheckAnswer', $event);
