@@ -37,7 +37,7 @@
     <config>
         <fields name="params">
             <fieldset name="basic"
-                    addfieldpath="modules/mod_qlcontent/php/fields">
+                    addfieldpath="/modules/mod_qlcontent/php/fields">
                 <field
                         name="todo"
                         type="list"

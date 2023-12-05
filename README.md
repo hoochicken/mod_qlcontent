@@ -11,7 +11,7 @@ I love coding. My extensions are for free. Wanna say thanks? You're welcome!
 
 ## Display
 
-mod_qlform offers the following display types:
+mod_qlcontent offers the following display types:
 
 * data of single article
 * data of current or fix  article

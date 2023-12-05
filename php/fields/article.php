@@ -1,7 +1,7 @@
 <?php
 /**
- * @package        mod_qlform
- * @copyright      Copyright (C) 2015 ql.de All rights reserved.
+ * @package        mod_qlcontent
+ * @copyright      Copyright (C) 2023 ql.de All rights reserved.
  * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -11,35 +11,21 @@ use Joomla\CMS\Language\Text;
 
 defined('_JEXEC') or die;
 jimport('joomla.html.html');
-//import the necessary class definition for formfield
 jimport('joomla.form.formfield');
 
-class FormFieldArticle extends FormField
+class JFormFieldArticle extends FormField
 {
-    /**
-     * The form field type.
-     *
-     * @var  string
-     * @since 1.6
-     */
-    protected $type = 'article'; //the form field type see the name is the same
+    protected $type = 'article';
 
-    /**
-     * Method to retrieve the lists that resides in your application using the API.
-     *
-     * @return array The field option objects.
-     * @since 1.6
-     */
     protected function getInput()
     {
-        $selected = !empty($this->value) ? $this->value : $this->default;
+        $selected = !empty($this->value) ? $this->value : ($this->default ?? false);
         $options = $this->getOptions($selected);
-        //echo '<pre>';print_r($options);echo '</pre>';
         $html = '';
-        $html .= '<select name="' . $this->name . '" id="' . $this->id . '">';
+        $html .= '<select name="' . $this->name . '" id="' . $this->id . '" class="form-select">';
         foreach ($options as $k => $v) {
             $html .= '<option value="' . $v['value'] . '"';
-            if (true == $v['selected']) {
+            if ($v['selected']) {
                 $html .= ' selected="selected"';
             }
             $html .= '>' . Text::_($v['label']) . '</option>';
@@ -50,8 +36,7 @@ class FormFieldArticle extends FormField
 
     private function getOptions($selected)
     {
-        $array = array
-        (
+        $array = [
             'title',
             'category',
             'introtext',
@@ -72,23 +57,20 @@ class FormFieldArticle extends FormField
             'show_email_icon',
             'hits',
             'tags',
-        );
-        $options = array();
-        $options[0] = array(
+        ];
+        $options = [];
+        $options[0] = [
             'label' => 'JNONE',
             'value' => 0,
-            'selected' => false,
-        );
-        if ($selected === '0') $options[0]['selected'] = true;
+            'selected' => $selected === '0',
+        ];
 
         foreach ($array as $k => $v) {
-            $options[$v] = array
-            (
+            $options[$v] = [
                 'label' => 'MOD_QLCONTENT_' . strtoupper($v),
                 'value' => $v,
-                'selected' => false,
-            );
-            if ($selected == $v) $options[$v]['selected'] = true;
+                'selected' => (string)$selected === (string)$v,
+            ];
         }
         return $options;
     }

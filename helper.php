@@ -1,7 +1,7 @@
 <?php
 /**
  * @package        mod_qlcontent
- * @copyright      Copyright (C) 2022 ql.de All rights reserved.
+ * @copyright      Copyright (C) 2023 ql.de All rights reserved.
  * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -17,6 +17,7 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Table;
 use Joomla\Component\Finder\Administrator\Indexer\Parser\Html;
+use Joomla\Database\DatabaseDriver;
 use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
@@ -29,28 +30,31 @@ PluginHelper::importPlugin('content');
 
 class modQlcontentHelper
 {
-    protected $featured;
-    protected $limit;
-    protected $state;
-    protected $language;
-    protected $bd;
-    public $type;
-    public $params;
-    private $module;
-    private $order;
+    protected string $featured;
+    protected int $limit;
+    protected string $state;
+    protected string $language;
+    protected ?DatabaseDriver $bd;
+    public string $type;
+    public Joomla\Registry\Registry $params;
+    private stdClass $module;
+    private string $order;
     public $pagination;
 
-    /**
-     * constructor
-     * @param $module
-     */
+    const FEATURED_ONLY = 1;
+    const FEATURED_BOTH = 2;
+    const FEATURED_NONE = 0;
+    const FEATURED_PREFERRED = 3;
+
     public function __construct($module)
     {
-        $this->db = Factory::getDbo();
+        $this->db = Factory::getContainer()->get('DatabaseDriver');
         $this->query = $this->db->getQuery(true);
         $this->module = $module;
         $this->autoload();
-        $this->params = $module->params;
+        $registry = new JRegistry;
+        $registry->loadString($module->params);
+        $this->params = $registry;
     }
 
     /**
@@ -72,44 +76,31 @@ class modQlcontentHelper
         $this->query = $this->db->getQuery(true);
     }
 
-    /**
-     * method to set if featured or not
-     * @param integer $featured
-     * @return string $featured part of query
-     */
-    public function setFeatured($col, $featured)
+
+    public function setFeatured(string $col, int $featured)
     {
-        if (0 == $featured or 1 == $featured) $this->featured = $col . '=\'' . $featured . '\'';
-        else $this->featured = '';
+        $this->featured = (in_array($featured, [static::FEATURED_NONE, static::FEATURED_ONLY]))
+            ? $col . '=\'' . $featured . '\''
+            : '';
     }
 
-    /**
-     * method to set limit
-     * @param $numLimit
-     * @return string $limit part of query
-     */
     public function setLimit($numLimit)
     {
-        if ($numLimit >= 0) $this->limit = $numLimit;
-        else $this->limit = '';
+        $this->limit = ($numLimit >= 0)
+            ? $numLimit
+            : 0;
     }
 
-    /**
-     * method to set published
-     * @param $col
-     * @param $state
-     * @return string $limit part of query
-     */
-    public function setSelectState($col, $state)
+    public function setSelectState(string $col, int $state)
     {
-        //if ('con.state'!=$col) return;
         $query = '';
         /*check rights (registered etc.)*/
-        if (true == $this->checkIfUserAuthorizedEdit()) $query .= '((' . $col . '=\'0\') OR (' . $col . '=\'1\') OR (' . $col . '=\'2\'))';
-        else $query .= $col . '=\'' . $state . '\'';
+        $query .= ($this->checkIfUserAuthorizedEdit())
+            ? sprintf('((%s=\'0\') OR (%s=\'1\') OR (%s=\'2\'))', $col, $col, $col)
+            : $col . '=\'' . $state . '\'';
 
         /*check state*/
-        if (1 == $state and 'con.state' == $col) {
+        if ($state && 'con.state' === $col) {
             $date = '\'' . date('Y-m-d H:i:s') . '\'';
             $query .= 'AND (';
             $query .= '(con.publish_up <' . $date . ' AND con.publish_down =\'0000-00-00 00:00:00\')';
@@ -124,14 +115,10 @@ class modQlcontentHelper
         $this->state = $query;
     }
 
-    /**
-     * @return bool
-     */
     public function checkIfUserAuthorizedEdit()
     {
         $user = Factory::getApplication()->getIdentity();
-        if ($user->authorise('core.edit.state', 'com_content') or $user->authorise('core.edit', 'com_content')) return true;
-        return false;
+        return $user->authorise('core.edit.state', 'com_content') || $user->authorise('core.edit', 'com_content');
     }
 
     /**
@@ -145,141 +132,105 @@ class modQlcontentHelper
         if (0 >= count($authorised)) return;
         $where = '';
         $whereAccess = array();
-        foreach ($authorised as $k => $v) $whereAuthorised[$k] = '`access`=\'' . $v . '\'';
+        foreach ($authorised as $k => $v) {
+            $whereAuthorised[$k] = '`access`=\'' . $v . '\'';
+        }
         $this->query->where('(' . implode(' OR ', $whereAuthorised) . ')');
     }
 
-    /**
-     * method to set language
-     * @param integer $language
-     * @return string $language part of query
-     */
-    public function setLanguage($col, $language)
+    public function setLanguage(string $col, ?string $language = null)
     {
-        if ('' != $language) $this->language = $col . '=\'' . $language . '\'';
-        else $this->language = '';
+        $this->language = (!empty($language))
+            ? $col . '=\'' . $language . '\''
+            : '';
     }
 
-    /**
-     * method to set order by
-     * @param $orderBy
-     * @param $orderDirection
-     * @return string $language part of query
-     */
-    public function setOrderBy($orderBy, $orderDirection)
+    public function setOrderBy(string $orderBy, string $orderDirection = 'ASC')
     {
-        if ('' != $orderBy) $this->order = $orderBy . ' ' . strtoupper($orderDirection);
-        else $this->order = '';
+        $this->order = !empty($orderBy)
+            ? $orderBy . ' ' . strtoupper($orderDirection)
+            : '';
     }
 
-    /**
-     * method to set some parts of query
-     * @param int $featured
-     * @return string part of query
-     */
-    protected function setAddendum($featured = 1)
+    protected function setAddendum(int $featured = self::FEATURED_ONLY)
     {
         $this->setAccessFilter();
-        if (1 == $featured and '' != $this->featured) $this->query->where($this->featured);
-        if ('' != $this->language) $this->query->where($this->language);
-        if ('' != $this->state) $this->query->where($this->state);
-        if ('' != $this->order) $this->query->order($this->order);
-        if ('' != $this->limit) $this->query->setLimit($this->limit);
+        if (static::FEATURED_ONLY === $featured && !empty($this->featured)) $this->query->where($this->featured);
+        if (!empty($this->language)) $this->query->where($this->language);
+        if (!empty($this->state)) $this->query->where($this->state);
+        if (!empty($this->order)) $this->query->order($this->order);
+        if (!empty($this->limit)) $this->query->setLimit($this->limit);
     }
 
-    /**
-     * method to get data from db
-     * @return result object with table data
-     * @internal param string $query sql query
-     */
-    protected function askDb()
+    protected function askDb(): array
     {
-        if (is_numeric($this->limit) and 0 < $this->limit) $this->db->setQuery($this->query, 0, $this->limit);
-        //if(97==$this->module->id)die($this->query);
-        else $this->db->setQuery($this->query);
+        if (is_numeric($this->limit) && 0 < $this->limit) {
+            $this->db->setQuery($this->query, 0, $this->limit);
+        } else {
+            $this->db->setQuery($this->query);
+        }
         return $this->db->loadObjectList();
     }
 
-    /**
-     * method to get item
-     * @param int $numId
-     * @return array $arrItems array  with all item data
-     */
-    public function getArticle(int $numId): array
+    public function getArticle(int $id): array
     {
-        $arrItems = $this->getDataArticle($numId);
-        //echo '<pre>';print_r($arrItems);die;
-        //while (list($k, $item) = each($arrItems)) {
-        foreach ($arrItems as $k => $item) {
+        $items = $this->getDataArticle($id);
+
+        foreach ($items as $k => $item) {
             $item = $this->addSlugCategory($item);
             $item = $this->addSlugItem($item, 'article');
             $item = $this->getItemAuthorization($item);
             $item = $this->addJson($item, 'images');
             $item = $this->addJson($item, 'urls');
             $item = $this->addJson($item, 'attribs');
-            $arrItems[$k] = $item;
+            $items[$k] = $item;
         }
-        return $arrItems;
+        return $items;
     }
 
-    /**
-     * method to get data fields from current article
-     * @param string $numId
-     * @return result object with table data
-     */
-    protected function getDataArticle(int $numId)
+    protected function getDataArticle(int $id): array
     {
         $this->query = $this->db->getQuery(true);
         $this->query->select('con.*, cat.id AS category_id, cat.alias AS category_alias, cat.title AS category, us.name AS user_name, us.username AS user_username');
         $this->query->from('`#__content` AS con, `#__categories` AS cat, `#__users` AS us');
-        //$this->query->where('con.id=\''.$numId.'\' AND con.catid=cat.id AND con.created_by=us.id');
-        $this->query->where('con.id=\'' . $numId . '\'');
+        $this->query->where(sprintf('con.id=\'%s\'', $id));
         $this->query->where('con.catid=cat.id');
         $this->query->group('id');
-        //die($this->query);
         return $this->askDb();
     }
 
-    /**
-     * method to get fields from current article
-     * @param string $strField
-     * @return result field value
-     * @throws Exception
-     */
-    public function getCurrentArticle($strField)
+    public function getCurrentArticle(string $field)
     {
         $objInput = Factory::getApplication()->input;
         $strOption = $objInput->get('option');
         $strView = $objInput->get('view');
         if ('com_content' !== $strOption || 'article' !== $strView) {
-            return false;
+            return [];
         }
-        $strId = (string)$objInput->get('id');
-        $arrIds = explode(':', $strId);
-        $numArticleId = $arrIds[0];
-        $objArticle = Table::getInstance('content');
+        $id = (string)$objInput->get('id', 0);
+        $ids = explode(':', $id);
+        $articleId = $ids[0];
+        $articleTable = Table::getInstance('content');
+
+        // $mvcFactory = Factory::getApplication()->bootComponent('com_content')->getMVCFactory();
+        // $articleTable = $mvcFactory->createModel('Article', 'Administrator', ['ignore_request' => true]);
+
         // $objArticle = Factory::getApplication()->bootComponent('com_content')->getMVCFactory()->createTable($name, $prefix, $config)('content');
-        $objArticle->load($numArticleId);
-        $return = $objArticle->get($strField);
-        return $return;
+        $articleTable->load($articleId);
+        return $articleTable->get($field);
 
     }
 
-    /**
-     * method to get fields from current category
-     * @param string $strField
-     * @return result field value
-     * @throws Exception
-     */
-    public function getCurrentCategory($strField)
+    public function getCurrentCategory($field)
     {
         $input = Factory::getApplication()->input;
         $option = $input->get('option');
         $view = $input->get('view');
-        if (('com_content' == $option or 'com_contact' == $option) and ('category' == $view or 'categories' == $view)) {
+        if (('com_content' == $option || 'com_contact' == $option) && ('category' == $view || 'categories' == $view)) {
             $numIds = explode(':', (string)$input->get('id'));
             return $numIds[0];
-        } else return false;
+        }
+        return [];
     }
 
     /**
@@ -309,26 +260,15 @@ class modQlcontentHelper
         return $item;
     }
 
-    /**
-     * method to check authorization
-     * @param object $item
-     * @return result $item with new links if not authorized
-     */
     protected function getItemAuthorization($item)
     {
         $access = !ComponentHelper::getParams('com_content')->get('show_noauth');
-        $authorised = Access::getAuthorisedViewLevels(Factory::getApplication()->getIdentity()->getParam('id'));
+        $authorised = Access::getAuthorisedViewLevels(Factory::getApplication()->getIdentity()->getParam('id') ?? 0);
         if ($access || in_array($item->access, $authorised)) $item->link = Route::_(ContentHelperRoute::getArticleRoute($item->slug, $item->catslug));
         else $item->link = Route::_('index.php?option=com_users&view=login');
         return $item;
     }
 
-    /**
-     * method to add image information to item
-     * @param object $item
-     * @param $strField
-     * @return result $item with images keys
-     */
     protected function addJson($item, $strField)
     {
         $var = null;
@@ -396,10 +336,10 @@ class modQlcontentHelper
      * @param array $arrCatid
      * @return mixed result object with table data on success or false on failure
      */
-    public function getArticles($arrCatid)
+    public function getArticles($catids)
     {
-        if (!in_array('all', $arrCatid)) {
-            $where = $this->getWhereQueryOr($arrCatid, 'con.catid');
+        if (!in_array('all', $catids)) {
+            $where = $this->getWhereQueryOr($catids, 'con.catid');
             $this->query->where($where);
         }
         $this->query->select('con.id');
@@ -421,7 +361,7 @@ class modQlcontentHelper
      * @param $strColumnName
      * @return mixed result object with table data on success or false on failure
      */
-    protected function getWhereQueryOr($arrIds, $strColumnName)
+    protected function getWhereQueryOr($arrIds, $strColumnName): string
     {
         if (is_array($arrIds)) {
             $strQuery = $strColumnName . ' IN (' . implode(',', $arrIds) . ')';
@@ -432,12 +372,7 @@ class modQlcontentHelper
         return $strQuery;
     }
 
-    /**
-     * method to get data fields from current article
-     * @param string $numIds
-     * @return mixed result object with table data on success or false on failure
-     */
-    public function getCategoryChildren($numIds)
+    public function getCategoryChildren($numIds): array
     {
         $where = $this->getWhereQueryOr($numIds, 'cat.parent_id');
         $this->query = $this->db->getQuery(true);
@@ -446,30 +381,15 @@ class modQlcontentHelper
         $this->query->where('cat.extension=\'com_content\'');
         $this->query->where($where);
         $this->setAddendum(0);
-        //die($this->query);
         return $this->askDb();
     }
 
-    /**
-     * method to add targets to urls
-     * @param object $item with data
-     * @return object result object with additional url data
-     */
-    public function urlBehavior($item)
+    public function urlBehavior(stdClass $item): stdClass
     {
         foreach (range('a', 'c') as $k => $v) {
             if (isset($item->{'url' . $v}) and isset($item->{'target' . $v})) {
                 switch ($item->{'target' . $v}) {
-                    case 0:
-                        $target = '';
-                        $class = '';
-                        $rel = '';
-                        break;
                     case 1:
-                        $target = '_blank';
-                        $class = '';
-                        $rel = '';
-                        break;
                     case 2:
                         $target = '_blank';
                         $class = '';
@@ -482,6 +402,7 @@ class modQlcontentHelper
                         if (!isset($modal)) HTMLHelper::_('behavior.modal');
                         $modal = 1;
                         break;
+                    case 0:
                     default :
                         $target = '';
                         $class = '';
@@ -492,31 +413,44 @@ class modQlcontentHelper
                 $item->{'url' . $v . 'class'} = $class;
                 $item->{'url' . $v . 'rel'} = $rel;
             }
-            if ((!isset($item->{'url' . $v . 'text'}) || (isset($item->{'url' . $v . 'text'}) && '' == $item->{'url' . $v . 'text'})) && isset($item->{'url' . $v})) $item->{'url' . $v . 'text'} = $item->{'url' . $v};
+            if (!isset($item->{'url' . $v . 'text'}) || empty($item->{'url' . $v . 'text'})) {
+                $item->{'url' . $v . 'text'} = $item->{'url' . $v} ?? '';
+            }
         }
         return $item;
     }
 
-    public function imageBehavior(stdClass $item, string $field)
+    public function imageBehavior(stdClass $item, string $field): stdClass
     {
-        if (!isset($item->$field) || empty($item->$field)) {
+        if (empty($item->$field)) {
             return $item;
         }
 
-        if (isset($item->{$field . '_alt'})) $alt = $item->{$field . '_alt'};
-        elseif (isset($item->title)) $alt = $item->title;
-        else $alt = $item->title;
-        if (isset($item->{$field . '_caption'})) $caption = $item->{$field . '_caption'};
+        if (isset($item->{$field . '_alt'})) {
+            $alt = $item->{$field . '_alt'};
+        } elseif (isset($item->title)) {
+            $alt = $item->title;
+        } else {
+            $alt = $item->title;
+        }
+        if (isset($item->{$field . '_caption'})) {
+            $caption = $item->{$field . '_caption'};
+        }
 
         return $item;
     }
 
-    public function readmoreBehavior($item, $params)
+    public function readmoreBehavior(stdClass $item, Registry $params): string
     {
-        if (isset($item->alternative_readmore) and '' != $item->alternative_readmore) $readmore = $item->alternative_readmore;
-        elseif ('' != $params->get('readmoretext')) $readmore = $params->get('readmoretext');
-        elseif ('COM_CONTENT_READ_MORE_TITLE' != Text::sprintf('COM_CONTENT_READ_MORE_TITLE')) $readmore = Text::sprintf('COM_CONTENT_READ_MORE_TITLE');
-        else $readmore = "Read more";
+        if (isset($item->alternative_readmore) && !empty($item->alternative_readmore)) {
+            $readmore = $item->alternative_readmore;
+        } elseif (!empty($params->get('readmoretext', ''))) {
+            $readmore = $params->get('readmoretext');
+        } elseif ('COM_CONTENT_READ_MORE_TITLE' !== Text::sprintf('COM_CONTENT_READ_MORE_TITLE')) {
+            $readmore = Text::sprintf('COM_CONTENT_READ_MORE_TITLE');
+        } else {
+            $readmore = "Read more";
+        }
         return $readmore;
     }
 
@@ -527,43 +461,43 @@ class modQlcontentHelper
         $obj_pagination = new modQlcontentPagination;
         $arrItems = $obj_pagination->addPagination($arrItems, $params->get('pagination_limit'));
         $this->pagination = $obj_pagination->getPagination();
-        //print_r($this->pagination);die;
         return $arrItems;
     }
 
-    /**
-     * method to prepare content
-     * @param object item
-     * @return object item
-     */
-    public function prepareContent($objItem)
+    public function prepareContent(stdClass $item): stdClass
     {
         PluginHelper::importPlugin('content');
-        $objItem->text = $objItem->introtext;
-        if (isset($objItem->fulltext)) {
-            $objItem->text .= $objItem->fulltext;
+        $item->text = $item->introtext ?? ($item->description ?? '');
+        if (isset($item->fulltext)) {
+            $item->text .= $item->fulltext;
         }
-        $params = new Registry($objItem);
-        $arrParamsDispatcher = ['com_content.article', &$objItem, &$params, 0];
+        $params = new Registry($item);
+        $arrParamsDispatcher = ['com_content.article', &$item, &$params, 0];
 
-        $dispatcher = Joomla\CMS\Factory::getApplication()->getDispatcher();
+        $dispatcher = Factory::getApplication()->getDispatcher();
         $event = new ContentPrepareEvent('onContentPrepare', $arrParamsDispatcher);
         $res = $dispatcher->dispatch('onCheckAnswer', $event);
 
-        $objItem->introtext = $objItem->text;
-        unset($objItem->text);
-        return $objItem;
+        $item->introtext = $item->text;
+        if (isset($item->description)) {
+            $item->description = $item->text;
+            unset($item->introtext);
+        }
+        if (isset($item->text)) {
+            unset($item->text);
+        }
+        return $item;
     }
 
-    public function cutString(string $string, int $count, string $unit = 'chars')
+    public function cutString(string $string, int $count, string $unit = 'chars'): string
     {
-        if ('chars' == $unit) return $string = substr(strip_tags($string), 0, $count);
-        else {
-            $arrString = preg_split('/ /', $string);
-            $arrString = array_slice($arrString, 0, $count);
-            $string = implode(' ', $arrString);
-            return $string;
+        if ('chars' === $unit) {
+            return substr(strip_tags($string), 0, $count);
         }
+
+        $arrString = preg_split('/ /', $string);
+        $arrString = array_slice($arrString, 0, $count);
+        return implode(' ', $arrString);
     }
 
     public function get($var, $default = null)
@@ -571,26 +505,10 @@ class modQlcontentHelper
         return $this->$var ?? $default;
     }
 
-    function getRowCount($int)
+    function getRowCount(int $columnCount): int
     {
-        return 12 / $int;
-        switch ($int) {
-            case 12:
-                $rowCount = 1;
-                break;
-            case 6:
-                $rowCount = 2;
-                break;
-            case 4:
-                $rowCount = 3;
-                break;
-            case 3:
-                $rowCount = 4;
-                break;
-            case 1:
-                $rowCount = 12;
-                break;
-        }
-        return $rowCount;
+        return ($columnCount <= 0)
+            ? 1
+            : 12 / $columnCount;
     }
 }
