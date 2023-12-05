@@ -251,6 +251,7 @@
                     <option value="2">MOD_QLCONTENT_FEATURED_BOTH</option>
                     <option value="1">MOD_QLCONTENT_FEATURED_ONLY</option>
                     <option value="0">MOD_QLCONTENT_FEATURED_NONE</option>
+                    <option value="3">MOD_QLCONTENT_FEATURED_PREF_BOTH</option>
                 </field>
                 <field name="count"
                        type="text"

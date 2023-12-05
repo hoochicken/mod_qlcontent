@@ -6,12 +6,15 @@
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Form\FormField;
+use Joomla\CMS\Language\Text;
+
 defined('_JEXEC') or die;
 jimport('joomla.html.html');
 //import the necessary class definition for formfield
 jimport('joomla.form.formfield');
 
-class JFormFieldQLcategory extends JFormField
+class FormFieldQLcategory extends FormField
 {
     /**
      * The form field type.
@@ -39,7 +42,7 @@ class JFormFieldQLcategory extends JFormField
         foreach ($options as $k => $v) {
             $html .= '<option value="' . $v['value'] . '"';
             if (true == $v['selected']) $html .= ' selected="selected"';
-            $html .= '>' . JText::_($v['label']) . '</option>';
+            $html .= '>' . Text::_($v['label']) . '</option>';
         }
         $html .= '</select>';
         return $html;

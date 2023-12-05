@@ -6,7 +6,15 @@
  * @license        GNU General Public License version 2 || later; see LICENSE.txt
  */
 // no direct access
+use Joomla\CMS\Factory;
+use Joomla\CMS\Helper\ModuleHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Session\Session;
+
 defined('_JEXEC') || die;
+
+/** @var Joomla\Registry\Registry $params */
+/** @var stdClass $module */
 
 // Include the syndicate functions only once
 require_once dirname(__FILE__) . '/helper.php';
@@ -15,6 +23,8 @@ $obj_helper = new modQlcontentHelper($module);
 $numId = '';
 $numTodo = $params->get('todo');
 $boolCategory = true;
+$featured = $params->get('featured', );
+$input = Factory::getApplication()->input;
 
 $numModuleIdCheck = 0;
 if ($numModuleIdCheck === $module->id) {
@@ -23,13 +33,13 @@ if ($numModuleIdCheck === $module->id) {
 }
 
 
-if (0 != $params->get('checkToken', 0) && false == JSession::checkToken($params->get('checkToken', 'post'))) {
+if (0 != $params->get('checkToken', 0) && false == Session::checkToken($params->get('checkToken', 'post'))) {
     return;
 }
 if (39 >= $numTodo) {
     $obj_helper->type = 'article';
     $obj_helper->setSelectState('con.state', $params->get('state'), 1);
-    $obj_helper->setFeatured('con.featured', $params->get('featured'), 0);
+    $obj_helper->setFeatured('con.featured', $featured, 0);
     $obj_helper->setLanguage('con.language', $params->get('languageFilter'));
     $obj_helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
     $obj_helper->setLimit($params->get('count'));
@@ -51,7 +61,6 @@ switch ($numTodo) {
 
     /*article:: via Get/Post*/
     case 12:
-        $input = JFactory::getApplication()->input;
         $numId = $input->get('qlcontent');
         $arrItems = $obj_helper->getArticle($numId);
         //echo '<pre>';print_r($arrItems);die;
@@ -107,7 +116,7 @@ switch ($numTodo) {
     /*articles:: articles of current category*/
     case 21:
         $catid = $obj_helper->getCurrentArticle('catid');
-        if (count($catid) > 0) $arrItems = $obj_helper->getArticles([0 => $catid]);
+        if (is_countable($catid) && count($catid) > 0) $arrItems = $obj_helper->getArticles([0 => $catid]);
         else $boolCategory = false;
         break;
 
@@ -210,7 +219,7 @@ switch ($numTodo) {
 }
 
 if (false === $boolCategory) {
-    echo(JText::_('MOD_QLCONTENT_NOCATEGORYDEFINED'));
+    echo(Text::_('MOD_QLCONTENT_NOCATEGORYDEFINED'));
 }
 
 
@@ -310,9 +319,9 @@ if (isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 < count($arrItems
         $pagination = $obj_helper->pagination;
     }
     $moduleclass_sfx = !empty($params->get('moduleclass_sfx')) ? htmlspecialchars($params->get('moduleclass_sfx')) : '';
-    require JModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
+    require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
 } elseif(1 == $params->get('boolEmptyMessage', 0) && isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 === count($arrItems)) {
-    require JModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_message');
+    require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_message');
 }
 
 //echo '<pre>';print_r($dataOfItems);die;
