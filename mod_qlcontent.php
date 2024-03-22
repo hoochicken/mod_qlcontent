@@ -25,6 +25,9 @@ $numId = '';
 $todo = (int)$params->get('todo', 0);
 $boolCategory = true;
 $featured = (int)$params->get('featured', modQlcontentHelper::FEATURED_BOTH);
+$tags = $params->get('tags', []);
+if (!is_array($tags)) $tags = [];
+
 $input = Factory::getApplication()->input;
 $arrItems = [];
 $above = false;
@@ -45,6 +48,7 @@ if (39 >= $todo) {
     $helper->setLanguage('con.language', $params->get('languageFilter'));
     $helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
     $helper->setLimit($params->get('count'));
+	if (0 < count($tags)) $helper->filterByTags($tags);
 } else {
     $helper->type = 'category';
     $helper->setSelectState('cat.published', $params->get('statecategory'));

@@ -121,6 +121,14 @@ class modQlcontentHelper
         return $user->authorise('core.edit.state', 'com_content') || $user->authorise('core.edit', 'com_content');
     }
 
+    public function filterByTags(array $tags)
+    {
+        if (empty($tags)) {
+			return;
+		}
+		$this->query->where('id IN(SELECT content_item_id FROM #__contentitem_tag_map WHERE tag_id IN(' . implode(',', $tags) . '))');
+    }
+
     /**
      * set access filter
      */
