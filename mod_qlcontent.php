@@ -26,6 +26,10 @@ $todo = (int)$params->get('todo', 0);
 $boolCategory = true;
 $featured = (int)$params->get('featured', modQlcontentHelper::FEATURED_BOTH);
 $tags = $params->get('tags', []);
+$limitForQuery = $featured === modQlcontentHelper::FEATURED_PREFERRED
+    ? 0
+    : (int)$params->get('count', 0);
+$limit = $params->get('count', 0);
 if (!is_array($tags)) $tags = [];
 
 $input = Factory::getApplication()->input;
@@ -47,8 +51,8 @@ if (39 >= $todo) {
     $helper->setFeatured('con.featured', $featured, 0);
     $helper->setLanguage('con.language', $params->get('languageFilter'));
     $helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
-    $helper->setLimit($params->get('count'));
-	if (0 < count($tags)) $helper->filterByTags($tags);
+    $helper->setLimit($limitForQuery);
+    if (0 < count($tags)) $helper->filterByTags($tags);
 } else {
     $helper->type = 'category';
     $helper->setSelectState('cat.published', $params->get('statecategory'));
@@ -271,7 +275,7 @@ switch ($todo) {
             $helper->setFeatured('con.featured', $params->get('featured'));
             $helper->setLanguage('con.language', $params->get('languageFilter'));
             $helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
-            $helper->setLimit($params->get('count'));
+            $helper->setLimit($limit);
             $arrItems = $helper->getArticles($catid);
             $helper->type = 'article';
         }
@@ -387,7 +391,8 @@ if ($featured === modQlcontentHelper::FEATURED_PREFERRED) {
     $arrItemsOrdered = [
         ...array_filter($arrItemsOrdered, function($item) use ($arrItemsIdFeatured) {return in_array($item->id, $arrItemsIdFeatured);}),
         ...array_filter($arrItemsOrdered, function($item) use ($arrItemsIdNormalo) {return in_array($item->id, $arrItemsIdNormalo);}),
-        ];
+    ];
+    $arrItemsOrdered = array_slice($arrItemsOrdered, 0, $limit);
 }
 
 if (isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 < count($arrItems)) {

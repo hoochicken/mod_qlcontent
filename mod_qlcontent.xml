@@ -6,12 +6,12 @@
         method="upgrade">
     <name>mod_qlcontent</name>
     <author>Mareike Riegel</author>
-    <creationDate>Octobre 2023</creationDate>
+    <creationDate>May 2024</creationDate>
     <copyright>ql.de. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mareike.riegel@ql.de</authorEmail>
     <authorUrl>ql.de</authorUrl>
-    <version>10.0.2</version>
+    <version>10.0.3</version>
     <description>displays article or parts of an article or category info; also display list of articles and categories</description>
     <updateservers>
         <server type="extension" priority="1" name="qlcontent - Updates">https://raw.githubusercontent.com/hoochicken/mod_qlcontent/master/_jupdate/mod_qlcontent.xml</server>
