@@ -1,7 +1,6 @@
 <?php
 /**
- * @package        mod_qlcontent
- * @copyright    Copyright (C) 2023 ql.de All rights reserved.
+ * @copyright    Copyright (C) 2024 ql.de All rights reserved.
  * @author        Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 || later; see LICENSE.txt
  */
@@ -11,26 +10,29 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Helper\ModuleHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Session\Session;
+use Joomla\Registry\Registry;
 
-defined('_JEXEC') || die;
+defined('_JEXEC') || exit;
 
-/** @var Joomla\Registry\Registry $params */
+/** @var Registry $params */
 /** @var stdClass $module */
 
 // Include the syndicate functions only once
-require_once dirname(__FILE__) . '/helper.php';
+require_once dirname(__FILE__).'/helper.php';
 $helper = new modQlcontentHelper($module);
 
 $id = '';
-$todo = (int)$params->get('todo', 0);
+$todo = (int) $params->get('todo', 0);
 $isCategoryView = true;
-$featured = (int)$params->get('featured', modQlcontentHelper::FEATURED_BOTH);
+$featured = (int) $params->get('featured', modQlcontentHelper::FEATURED_BOTH);
 $tags = $params->get('tags', []);
-$limitForQuery = $featured === modQlcontentHelper::FEATURED_PREFERRED
+$limitForQuery = modQlcontentHelper::FEATURED_PREFERRED === $featured
     ? 0
-    : (int)$params->get('count', 0);
+    : (int) $params->get('count', 0);
 $limit = $params->get('count', 0);
-if (!is_array($tags)) $tags = [];
+if (!is_array($tags)) {
+    $tags = [];
+}
 
 $input = Factory::getApplication()->input;
 $arrItems = [];
@@ -39,7 +41,8 @@ $above = false;
 $moduleIdCheck = 0;
 if ($moduleIdCheck === $module->id) {
     print_r($todo);
-    die;
+
+    exit;
 }
 
 if (0 != $params->get('checkToken', 0) && !Session::checkToken($params->get('checkToken', 'post'))) {
@@ -52,7 +55,9 @@ if (39 >= $todo) {
     $helper->setLanguage('con.language', $params->get('languageFilter'));
     $helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
     $helper->setLimit($limitForQuery);
-    if (0 < count($tags)) $helper->filterByTags($tags);
+    if (0 < count($tags)) {
+        $helper->filterByTags($tags);
+    }
 } else {
     $helper->type = 'category';
     $helper->setSelectState('cat.published', $params->get('statecategory'));
@@ -62,26 +67,28 @@ if (39 >= $todo) {
 }
 
 switch ($todo) {
-    /*article:: current article*/
+    // article:: current article
     case 11:
         $id = $helper->getCurrentArticle('id');
         $arrItems = is_numeric($id) ? $helper->getArticle($id) : [];
+
         break;
 
-    /*article:: via Get/Post*/
+        // article:: via Get/Post
     case 12:
         $id = $input->get('qlcontent');
         $arrItems = $helper->getArticle($id);
+
         break;
 
-    /*article:: current article; if none, fix category*/
+        // article:: current article; if none, fix category
     case 13:
         $id = $helper->getCurrentArticle('id');
         if (empty($id)) {
-            /*set vars for use of display below*/
+            // set vars for use of display below
             $todo = 45;
             $helper->type = 'category';
-            /*repeated statement for category display*/
+            // repeated statement for category display
             $helper->resetQuery();
             $helper->setSelectState('cat.published', $params->get('statecategory', 0));
             $helper->setFeatured('cat.featured', 0);
@@ -103,24 +110,27 @@ switch ($todo) {
         } else {
             $arrItems = $helper->getArticle($id);
         }
+
         break;
 
-    /*article:: fix article*/
+        // article:: fix article
     case 15:
         $id = $params->get('articleid', 0);
         $arrItems = $helper->getArticle($id);
+
         break;
 
-    /*article:: current article; if none, show fix article*/
+        // article:: current article; if none, show fix article
     case 17:
         $id = $helper->getCurrentArticle('id', 0);
         if (empty($id)) {
             $id = $params->get('articleid');
         }
         $arrItems = $helper->getArticle($id);
+
         break;
 
-    /*articles:: articles of fix category*/
+        // articles:: articles of fix category
     case 19:
         $arrCatid = $params->get('categoryid', 0);
         if (!is_array($arrCatid)) {
@@ -131,9 +141,10 @@ switch ($todo) {
         } else {
             $arrItems = $helper->getArticles($arrCatid);
         }
+
         break;
 
-    /*articles:: articles of current category*/
+        // articles:: articles of current category
     case 21:
         $objInput = Factory::getApplication()->input;
         $strOption = $objInput->get('option');
@@ -141,20 +152,21 @@ switch ($todo) {
         if ('com_content' === $strOption && 'article' === $strView) {
             $catid = [0 => $helper->getCurrentArticle('catid')];
         } elseif ('com_content' === $strOption && 'category' === $strView) {
-            $catid = [0 => $helper->getCurrentCategory("id")];
+            $catid = [0 => $helper->getCurrentCategory('id')];
         }
         if (is_countable($catid) && count($catid) > 0) {
             $arrItems = $helper->getArticles($catid);
         } else {
             $isCategoryView = false;
         }
+
         break;
 
-    /*articles:: articles of fix category if no current category*/
+        // articles:: articles of fix category if no current category
     case 23:
         $catid = [0 => $helper->getCurrentArticle('catid')];
         if (empty($catid[0])) {
-            $catid = [0 => $helper->getCurrentCategory("id")];
+            $catid = [0 => $helper->getCurrentCategory('id')];
         }
         if (empty($catid[0])) {
             $catid = [0 => $params->get('categoryid')];
@@ -164,9 +176,10 @@ switch ($todo) {
         } else {
             $isCategoryView = false;
         }
+
         break;
 
-    /*category:: current category of article(s)*/
+        // category:: current category of article(s)
     case 41:
         $arrCatid = [0 => $helper->getCurrentArticle('catid')];
         $arrCatid = array_filter($arrCatid);
@@ -179,9 +192,10 @@ switch ($todo) {
         } else {
             $isCategoryView = false;
         }
+
         break;
 
-    /*category:: fix category*/
+        // category:: fix category
     case 43:
         $catid = $params->get('categoryid', 0);
         if (count($catid) > 0) {
@@ -189,9 +203,10 @@ switch ($todo) {
         } else {
             $isCategoryView = false;
         }
+
         break;
 
-    /*category:: fix category if no current article || category*/
+        // category:: fix category if no current article || category
     case 45:
         $id = $helper->getCurrentArticle('id');
         if ('' != $id) {
@@ -204,9 +219,10 @@ switch ($todo) {
             }
             $arrItems = $helper->getCategory($catid);
         }
+
         break;
 
-    /*category:: list categories of fix parent category*/
+        // category:: list categories of fix parent category
     case 47:
         $catid = $params->get('categoryid', 0);
         $ids = $helper->getCategoryChildren($catid);
@@ -217,9 +233,10 @@ switch ($todo) {
             $arrItems = $helper->getCategory($arr_id);
         }
         $helper->type = 'category';
+
         break;
 
-    /*category:: list child categories of current parent category*/
+        // category:: list child categories of current parent category
     case 49:
         $catid = [0 => $helper->getCurrentArticle('catid')];
         if ('' == $catid[0]) {
@@ -235,9 +252,10 @@ switch ($todo) {
             $arrItems = $helper->getCategory($arr_id);
         }
         $helper->type = 'category';
+
         break;
 
-    /*category:: list child categories of current parent category - if no current, list fix category*/
+        // category:: list child categories of current parent category - if no current, list fix category
     case 50:
         $catid = [0 => $helper->getCurrentArticle('catid')];
         if (empty($catid[0])) {
@@ -252,10 +270,14 @@ switch ($todo) {
                 $arr_id[] = $v->id;
             }
         }
-        if (isset($arr_id) && count($arr_id) > 0) $arrItems = $helper->getCategory($arr_id);
+        if (isset($arr_id) && count($arr_id) > 0) {
+            $arrItems = $helper->getCategory($arr_id);
+        }
         $helper->type = 'category';
+
         break;
-    /*category:: list child categories of current parent category - if no current, list fix category - if no children categories, show articles*/
+
+        // category:: list child categories of current parent category - if no current, list fix category - if no children categories, show articles
     case 51:
         $catid = [0 => $helper->getCurrentArticle('catid')];
         if (empty($catid[0])) {
@@ -266,8 +288,12 @@ switch ($todo) {
         }
         $ids = $helper->getCategoryChildren($catid);
         if (isset($ids) && is_array($ids) && count($ids) > 0) {
-            foreach ($ids as $k => $v) $arr_id[] = $v->id;
-            if (isset($arr_id) && count($arr_id) > 0) $arrItems = $helper->getCategory($arr_id);
+            foreach ($ids as $k => $v) {
+                $arr_id[] = $v->id;
+            }
+            if (isset($arr_id) && count($arr_id) > 0) {
+                $arrItems = $helper->getCategory($arr_id);
+            }
             $helper->type = 'category';
         } else {
             $helper->setSelectState('con.state', $params->get('state'));
@@ -284,20 +310,19 @@ if (!$isCategoryView) {
     echo Text::_('MOD_QLCONTENT_NOCATEGORYDEFINED');
 }
 
-
-/*Add default values to item where data is empty*/
+// Add default values to item where data is empty
 if ($params->get('default_use', 0)) {
     $itemDefault = new stdClass();
     if ($todo < 40) {
-        for ($i = 1; $i <= 20; $i++) {
-            if (false != $params->get('art_position' . $i)) {
-                $itemDefault->{$params->get('art_position' . $i)} = $params->get('default_art_position' . $i);
+        for ($i = 1; $i <= 20; ++$i) {
+            if (false != $params->get('art_position'.$i)) {
+                $itemDefault->{$params->get('art_position'.$i)} = $params->get('default_art_position'.$i);
             }
         }
     } else {
-        for ($i = 1; $i <= 8; $i++) {
-            if (false != $params->get('cat_position' . $i)) {
-                $itemDefault->{$params->get('cat_position' . $i)} = $params->get('default_cat_position' . $i);
+        for ($i = 1; $i <= 8; ++$i) {
+            if (false != $params->get('cat_position'.$i)) {
+                $itemDefault->{$params->get('cat_position'.$i)} = $params->get('default_cat_position'.$i);
             }
         }
     }
@@ -306,8 +331,8 @@ if ($params->get('default_use', 0)) {
     } elseif (is_array($arrItems)) {
         foreach ($arrItems as $k => $v) {
             foreach ($v as $k2 => $v2) {
-                if ('' == $v2 && isset($itemDefault->$k2)) {
-                    $arrItems[$k]->$k2 = $itemDefault->$k2;
+                if ('' == $v2 && isset($itemDefault->{$k2})) {
+                    $arrItems[$k]->{$k2} = $itemDefault->{$k2};
                 }
             }
         }
@@ -322,35 +347,34 @@ if (isset($arrItems) && is_array($arrItems)) {
             continue;
         }
         $dataOfItems[$v->id] = new stdClass();
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= 20; ++$i) {
             if (!isset($v->id)) {
                 $v->id = 0;
             }
 
             $field = '';
             if ('category' === $helper->type) {
-                $field = $params->get('cat_position' . $i);
+                $field = $params->get('cat_position'.$i);
             } elseif ('article' === $helper->type) {
-                $field = $params->get('art_position' . $i);
+                $field = $params->get('art_position'.$i);
             }
-            if ('0' != $field && !empty($field) && isset($v->$field) && ((!empty($v->$field) && $params->get('displayempty')) || !$params->get('displayempty'))) {
+            if ('0' != $field && !empty($field) && isset($v->{$field}) && ((!empty($v->{$field}) && $params->get('displayempty')) || !$params->get('displayempty'))) {
                 if (!isset($arrItemsOrdered[$k])) {
-                    $arrItemsOrdered[$k] = new stdClass;
+                    $arrItemsOrdered[$k] = new stdClass();
                 }
-                $arrItemsOrdered[$k]->$field = $v->$field;
-
+                $arrItemsOrdered[$k]->{$field} = $v->{$field};
             } elseif ('edit' == $field) {
                 if (!isset($arrItemsOrdered[$k])) {
-                    $arrItemsOrdered[$k] = new stdClass;
+                    $arrItemsOrdered[$k] = new stdClass();
                 }
-                $arrItemsOrdered[$k]->$field = 1;
-                $dataOfItems[$v->id]->$field = 1;
+                $arrItemsOrdered[$k]->{$field} = 1;
+                $dataOfItems[$v->id]->{$field} = 1;
             } elseif ('readmore' == $field) {
                 if (!isset($arrItemsOrdered[$k])) {
-                    $arrItemsOrdered[$k] = new stdClass;
+                    $arrItemsOrdered[$k] = new stdClass();
                 }
-                $arrItemsOrdered[$k]->$field = $helper->readmoreBehavior($v, $params);
-                $dataOfItems[$v->id]->$field = $helper->readmoreBehavior($dataOfItems[$v->id], $params);
+                $arrItemsOrdered[$k]->{$field} = $helper->readmoreBehavior($v, $params);
+                $dataOfItems[$v->id]->{$field} = $helper->readmoreBehavior($dataOfItems[$v->id], $params);
             }
             unset($field);
         }
@@ -359,13 +383,13 @@ if (isset($arrItems) && is_array($arrItems)) {
         if ($params->get('striptags', false) && isset($arrItemsOrdered[$k]->introtext)) {
             $arrItemsOrdered[$k]->introtext = strip_tags($dataOfItems[$v->id]->introtext);
         }
-        if (0 < (int)$params->get('cutintrotext', 0) && isset($arrItemsOrdered[$k]->introtext)) {
+        if (0 < (int) $params->get('cutintrotext', 0) && isset($arrItemsOrdered[$k]->introtext)) {
             $arrItemsOrdered[$k]->introtext = $helper->cutString($arrItemsOrdered[$k]->introtext, $params->get('cutintrotext', '0'), $params->get('cutintrotextunit', 'chars'));
         }
         if ($params->get('catstriptags', false) && isset($arrItemsOrdered[$k]->description)) {
             $arrItemsOrdered[$k]->description = strip_tags($dataOfItems[$v->id]->description);
         }
-        if (0 < (int)$params->get('catcutintrotext', 0) && isset($arrItemsOrdered[$k]->description)) {
+        if (0 < (int) $params->get('catcutintrotext', 0) && isset($arrItemsOrdered[$k]->description)) {
             $boolCut = (strlen($arrItemsOrdered[$k]->description) > $params->get('catcutintrotextunit', 'chars'));
             $arrItemsOrdered[$k]->description = $helper->cutString($arrItemsOrdered[$k]->description, $params->get('catcutintrotext', '0'), $params->get('catcutintrotextunit', 'chars'));
             if ($boolCut) {
@@ -382,9 +406,9 @@ if (isset($arrItems) && is_array($arrItems)) {
     }
 }
 
-if ($featured === modQlcontentHelper::FEATURED_PREFERRED) {
+if (modQlcontentHelper::FEATURED_PREFERRED === $featured) {
     $arrItemsIdFeatured = array_filter($dataOfItems, function ($item) {
-        return (bool)($item->featured ?? false);
+        return (bool) ($item->featured ?? false);
     });
     array_walk($arrItemsIdFeatured, function (&$item) {
         $item = $item->id;
@@ -415,11 +439,11 @@ if (isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 < count($arrItems
     $moduleclass_sfx = !empty($params->get('moduleclass_sfx'))
         ? htmlspecialchars($params->get('moduleclass_sfx'))
         : '';
+
     require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
 } elseif ($params->get('boolEmptyMessage', 0) && isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 === count($arrItems)) {
-    require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_message');
+    require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default').'_message');
 }
 
-//echo '<pre>';print_r($dataOfItems);die;
-unset($arrItemsPerRow);
-unset($intPerRow);
+// echo '<pre>';print_r($dataOfItems);die;
+unset($arrItemsPerRow, $intPerRow);

@@ -1,7 +1,6 @@
 <?php
 /**
- * @package        mod_qlcontent
- * @copyright      Copyright (C) 2023 ql.de All rights reserved.
+ * @copyright      Copyright (C) 2024 ql.de All rights reserved.
  * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -17,7 +16,7 @@ use Joomla\CMS\Language\Text;
 /** @var stdClass $arrItem */
 /** @var modQlcontentHelper $helper */
 
-defined('_JEXEC') or die;
+defined('_JEXEC') or exit;
 $lang = Factory::getLanguage();
 $langTag = substr($lang->get('tag'), 0, 2);
 ?>
@@ -27,7 +26,9 @@ $langTag = substr($lang->get('tag'), 0, 2);
         <ul class="dropdown-menu">
             <li class="edit-icon">
                 <a href="?lang=<?php echo $langTag; ?>&option=com_content&task=article.edit&a_id=<?php echo $arrItem->id; ?>">
-                    <?php echo Text::_('JACTION_EDIT'); ?><?php if (1 !== (int)$dataOfItems[$arrItem->id]->state) echo '<br />(' . JText::_('JNOTPUBLISHEDYET') . ')'; ?></a>
+                    <?php echo Text::_('JACTION_EDIT'); ?><?php if (1 !== (int) $dataOfItems[$arrItem->id]->state) {
+                        echo '<br />('.JText::_('JNOTPUBLISHEDYET').')';
+                    } ?></a>
             </li>
         </ul>
     </div>

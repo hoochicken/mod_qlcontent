@@ -1,14 +1,13 @@
 <?php
 /**
- * @package        mod_qlcontent
- * @copyright      Copyright (C) 2023 ql.de All rights reserved.
+ * @copyright      Copyright (C) 2024 ql.de All rights reserved.
  * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
-use \Joomla\Component\Fields\Administrator\Helper\FieldsHelper;
+use Joomla\Component\Fields\Administrator\Helper\FieldsHelper;
 
 // no direct access
-defined('_JEXEC') or die;
+defined('_JEXEC') or exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -17,11 +16,10 @@ defined('_JEXEC') or die;
 /** @var stdClass $arrItem */
 /** @var modQlcontentHelper $helper */
 ?>
-<?php if (isset($strField)) : ?>
+<?php if (isset($strField)) { ?>
     <div class="<?php echo $strField; ?>">
-        <?php foreach ($arrItem->$strField as $numKey => $objValue) {
+        <?php foreach ($arrItem->{$strField} as $numKey => $objValue) {
             echo FieldsHelper::render($objValue->context, 'field.render', ['field' => $objValue]);
         } ?>
     </div>
-<?php endif; ?>
-
+<?php } ?>
