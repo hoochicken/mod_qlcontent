@@ -21,9 +21,9 @@ defined('_JEXEC') || die;
 require_once dirname(__FILE__) . '/helper.php';
 $helper = new modQlcontentHelper($module);
 
-$numId = '';
+$id = '';
 $todo = (int)$params->get('todo', 0);
-$boolCategory = true;
+$isCategoryView = true;
 $featured = (int)$params->get('featured', modQlcontentHelper::FEATURED_BOTH);
 $tags = $params->get('tags', []);
 $limitForQuery = $featured === modQlcontentHelper::FEATURED_PREFERRED
@@ -36,8 +36,8 @@ $input = Factory::getApplication()->input;
 $arrItems = [];
 $above = false;
 
-$numModuleIdCheck = 0;
-if ($numModuleIdCheck === $module->id) {
+$moduleIdCheck = 0;
+if ($moduleIdCheck === $module->id) {
     print_r($todo);
     die;
 }
@@ -64,21 +64,20 @@ if (39 >= $todo) {
 switch ($todo) {
     /*article:: current article*/
     case 11:
-        $numId = $helper->getCurrentArticle('id');
-        $arrItems = $helper->getArticle($numId);
+        $id = $helper->getCurrentArticle('id');
+        $arrItems = is_numeric($id) ? $helper->getArticle($id) : [];
         break;
 
     /*article:: via Get/Post*/
     case 12:
-        $numId = $input->get('qlcontent');
-        $arrItems = $helper->getArticle($numId);
-        //echo '<pre>';print_r($arrItems);die;
+        $id = $input->get('qlcontent');
+        $arrItems = $helper->getArticle($id);
         break;
 
     /*article:: current article; if none, fix category*/
     case 13:
-        $numId = $helper->getCurrentArticle('id');
-        if (empty($numId)) {
+        $id = $helper->getCurrentArticle('id');
+        if (empty($id)) {
             /*set vars for use of display below*/
             $todo = 45;
             $helper->type = 'category';
@@ -90,9 +89,9 @@ switch ($todo) {
             $helper->setOrderBy($params->get('orderingcategory'), $params->get('orderingcategorydirection'));
             $helper->setLimit($params->get('countcategory'));
 
-            $numId = $helper->getCurrentArticle('id');
-            if (!empty($numId)) {
-                $arrItems = $helper->getArticle($numId);
+            $id = $helper->getCurrentArticle('id');
+            if (!empty($id)) {
+                $arrItems = $helper->getArticle($id);
                 $helper->type = 'article';
             } else {
                 $catid = [0 => $helper->getCurrentCategory('id')];
@@ -102,23 +101,23 @@ switch ($todo) {
                 $arrItems = $helper->getCategory($catid);
             }
         } else {
-            $arrItems = $helper->getArticle($numId);
+            $arrItems = $helper->getArticle($id);
         }
         break;
 
     /*article:: fix article*/
     case 15:
-        $numId = $params->get('articleid', 0);
-        $arrItems = $helper->getArticle($numId);
+        $id = $params->get('articleid', 0);
+        $arrItems = $helper->getArticle($id);
         break;
 
     /*article:: current article; if none, show fix article*/
     case 17:
-        $numId = $helper->getCurrentArticle('id', 0);
-        if (empty($numId)) {
-            $numId = $params->get('articleid');
+        $id = $helper->getCurrentArticle('id', 0);
+        if (empty($id)) {
+            $id = $params->get('articleid');
         }
-        $arrItems = $helper->getArticle($numId);
+        $arrItems = $helper->getArticle($id);
         break;
 
     /*articles:: articles of fix category*/
@@ -128,7 +127,7 @@ switch ($todo) {
             $arrCatid = [$arrCatid];
         }
         if (0 >= count($arrCatid)) {
-            $boolCategory = false;
+            $isCategoryView = false;
         } else {
             $arrItems = $helper->getArticles($arrCatid);
         }
@@ -147,7 +146,7 @@ switch ($todo) {
         if (is_countable($catid) && count($catid) > 0) {
             $arrItems = $helper->getArticles($catid);
         } else {
-            $boolCategory = false;
+            $isCategoryView = false;
         }
         break;
 
@@ -163,7 +162,7 @@ switch ($todo) {
         if (0 < count($catid)) {
             $arrItems = $helper->getArticles($catid);
         } else {
-            $boolCategory = false;
+            $isCategoryView = false;
         }
         break;
 
@@ -178,7 +177,7 @@ switch ($todo) {
         if (0 < count($arrCatid)) {
             $arrItems = $helper->getCategory($arrCatid);
         } else {
-            $boolCategory = false;
+            $isCategoryView = false;
         }
         break;
 
@@ -188,15 +187,15 @@ switch ($todo) {
         if (count($catid) > 0) {
             $arrItems = $helper->getCategory($catid);
         } else {
-            $boolCategory = false;
+            $isCategoryView = false;
         }
         break;
 
     /*category:: fix category if no current article || category*/
     case 45:
-        $numId = $helper->getCurrentArticle('id');
-        if ('' != $numId) {
-            $arrItems = $helper->getArticle($numId);
+        $id = $helper->getCurrentArticle('id');
+        if ('' != $id) {
+            $arrItems = $helper->getArticle($id);
             $helper->type = 'article';
         } else {
             $catid = [0 => $helper->getCurrentCategory('id')];
@@ -210,8 +209,8 @@ switch ($todo) {
     /*category:: list categories of fix parent category*/
     case 47:
         $catid = $params->get('categoryid', 0);
-        $numIds = $helper->getCategoryChildren($catid);
-        foreach ($numIds as $k => $v) {
+        $ids = $helper->getCategoryChildren($catid);
+        foreach ($ids as $k => $v) {
             $arr_id[] = $v->id;
         }
         if (isset($arr_id)) {
@@ -226,9 +225,9 @@ switch ($todo) {
         if ('' == $catid[0]) {
             $catid = [0 => $helper->getCurrentCategory('id')];
         }
-        $numIds = $helper->getCategoryChildren($catid);
-        if (isset($numIds) && is_array($numIds) && count($numIds) > 0) {
-            foreach ($numIds as $k => $v) {
+        $ids = $helper->getCategoryChildren($catid);
+        if (isset($ids) && is_array($ids) && count($ids) > 0) {
+            foreach ($ids as $k => $v) {
                 $arr_id[] = $v->id;
             }
         }
@@ -247,9 +246,9 @@ switch ($todo) {
         if (empty($catid[0])) {
             $catid = $params->get('categoryid');
         }
-        $numIds = $helper->getCategoryChildren($catid);
-        if (isset($numIds) && is_array($numIds) && count($numIds) > 0)  {
-            foreach ($numIds as $k => $v) {
+        $ids = $helper->getCategoryChildren($catid);
+        if (isset($ids) && is_array($ids) && count($ids) > 0) {
+            foreach ($ids as $k => $v) {
                 $arr_id[] = $v->id;
             }
         }
@@ -265,9 +264,9 @@ switch ($todo) {
         if (empty($catid[0])) {
             $catid = $params->get('categoryid');
         }
-        $numIds = $helper->getCategoryChildren($catid);
-        if (isset($numIds) && is_array($numIds) && count($numIds) > 0) {
-            foreach ($numIds as $k => $v) $arr_id[] = $v->id;
+        $ids = $helper->getCategoryChildren($catid);
+        if (isset($ids) && is_array($ids) && count($ids) > 0) {
+            foreach ($ids as $k => $v) $arr_id[] = $v->id;
             if (isset($arr_id) && count($arr_id) > 0) $arrItems = $helper->getCategory($arr_id);
             $helper->type = 'category';
         } else {
@@ -281,7 +280,7 @@ switch ($todo) {
         }
 }
 
-if (!$boolCategory) {
+if (!$isCategoryView) {
     echo Text::_('MOD_QLCONTENT_NOCATEGORYDEFINED');
 }
 
@@ -384,13 +383,25 @@ if (isset($arrItems) && is_array($arrItems)) {
 }
 
 if ($featured === modQlcontentHelper::FEATURED_PREFERRED) {
-    $arrItemsIdFeatured = array_filter($dataOfItems, function($item) { return (bool)($item->featured ?? false);});
-    array_walk($arrItemsIdFeatured, function(&$item) {$item = $item->id; });
-    $arrItemsIdNormalo = array_filter($dataOfItems, function($item) { return !($item->featured ?? false);});
-    array_walk($arrItemsIdNormalo, function(&$item) {$item = $item->id; });
+    $arrItemsIdFeatured = array_filter($dataOfItems, function ($item) {
+        return (bool)($item->featured ?? false);
+    });
+    array_walk($arrItemsIdFeatured, function (&$item) {
+        $item = $item->id;
+    });
+    $arrItemsIdNormalo = array_filter($dataOfItems, function ($item) {
+        return !($item->featured ?? false);
+    });
+    array_walk($arrItemsIdNormalo, function (&$item) {
+        $item = $item->id;
+    });
     $arrItemsOrdered = [
-        ...array_filter($arrItemsOrdered, function($item) use ($arrItemsIdFeatured) {return in_array($item->id, $arrItemsIdFeatured);}),
-        ...array_filter($arrItemsOrdered, function($item) use ($arrItemsIdNormalo) {return in_array($item->id, $arrItemsIdNormalo);}),
+        ...array_filter($arrItemsOrdered, function ($item) use ($arrItemsIdFeatured) {
+            return in_array($item->id, $arrItemsIdFeatured);
+        }),
+        ...array_filter($arrItemsOrdered, function ($item) use ($arrItemsIdNormalo) {
+            return in_array($item->id, $arrItemsIdNormalo);
+        }),
     ];
     $arrItemsOrdered = array_slice($arrItemsOrdered, 0, $limit);
 }

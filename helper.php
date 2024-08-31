@@ -177,7 +177,7 @@ class modQlcontentHelper
         } else {
             $this->db->setQuery($this->query);
         }
-        return $this->db->loadObjectList();
+        return array_values($this->db->loadObjectList());
     }
 
     public function getArticle(int $id): array
@@ -209,13 +209,13 @@ class modQlcontentHelper
 
     public function getCurrentArticle(string $field)
     {
-        $objInput = Factory::getApplication()->input;
-        $strOption = $objInput->get('option');
-        $strView = $objInput->get('view');
-        if ('com_content' !== $strOption || 'article' !== $strView) {
+        $input = Factory::getApplication()->input;
+        $option = $input->get('option');
+        $view = $input->get('view');
+        if ('com_content' !== $option || 'article' !== $view) {
             return [];
         }
-        $id = (string)$objInput->get('id', 0);
+        $id = (string)$input->get('id', 0);
         $ids = explode(':', $id);
         $articleId = $ids[0];
         $articleTable = Table::getInstance('content');
@@ -235,8 +235,8 @@ class modQlcontentHelper
         $option = $input->get('option');
         $view = $input->get('view');
         if (('com_content' == $option || 'com_contact' == $option) && ('category' == $view || 'categories' == $view)) {
-            $numIds = explode(':', (string)$input->get('id'));
-            return $numIds[0];
+            $ids = explode(':', (string)$input->get('id'));
+            return $ids[0];
         }
         return [];
     }
@@ -293,12 +293,12 @@ class modQlcontentHelper
 
     /**
      * method to get item
-     * @param $numIds
+     * @param $ids
      * @return array object with all item data
      */
-    public function getCategory($numIds)
+    public function getCategory($ids)
     {
-        $arrItems = $this->getDataCategory($numIds);
+        $arrItems = $this->getDataCategory($ids);
         $arrItems2 = array();
         foreach ($arrItems as $k => $v) {
             $v = $this->addSlugItem($v, 'category');
@@ -310,12 +310,12 @@ class modQlcontentHelper
 
     /**
      * method to get data fields from current article
-     * @param $numIds
+     * @param $ids
      * @return mixed result object with table data on success or false on failure
      */
-    public function getDataCategory($numIds)
+    public function getDataCategory($ids)
     {
-        $where = $this->getWhereQueryOr($numIds, 'cat.id');
+        $where = $this->getWhereQueryOr($ids, 'cat.id');
         //$this->query=$this->db->getQuery(true);
         $this->resetQuery();//query=$this->db->getQuery(true);
         $this->query->select('cat.*,cat.title as category, us.name AS user_name, us.username AS user_username');
@@ -380,9 +380,9 @@ class modQlcontentHelper
         return $strQuery;
     }
 
-    public function getCategoryChildren($numIds): array
+    public function getCategoryChildren($ids): array
     {
-        $where = $this->getWhereQueryOr($numIds, 'cat.parent_id');
+        $where = $this->getWhereQueryOr($ids, 'cat.parent_id');
         $this->query = $this->db->getQuery(true);
         $this->query->select('cat.id');
         $this->query->from('`#__categories` AS cat');
