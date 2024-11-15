@@ -72,6 +72,7 @@
                         label="MOD_QLCONTENT_ARTICLEID_LABEL"
                         description="MOD_QLCONTENT_ARTICLEID_DESC" >
                 </field>
+                <field name="tags" type="tag" label="JTAG" description="JTAG_DESC" mode="ajax" class="inputbox span12 small" multiple="true" />
                 <field
                         name="categoryid"
                         type="category"
