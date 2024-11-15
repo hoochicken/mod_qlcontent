@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension
         type="module"
-        version="10.0.4"
+        version="10.0.5"
         client="site"
         method="upgrade">
     <name>mod_qlcontent</name>
     <author>Mareike Riegel</author>
-    <creationDate>August 2024</creationDate>
+    <creationDate>November 2024</creationDate>
     <copyright>ql.de. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>mareike.riegel@ql.de</authorEmail>
     <authorUrl>ql.de</authorUrl>
-    <version>10.0.4</version>
+    <version>10.0.5</version>
     <description>displays article or parts of an article or category info; also display list of articles and categories</description>
     <updateservers>
         <server type="extension" priority="1" name="qlcontent - Updates">https://raw.githubusercontent.com/hoochicken/mod_qlcontent/master/_jupdate/mod_qlcontent.xml</server>
@@ -72,7 +72,6 @@
                         label="MOD_QLCONTENT_ARTICLEID_LABEL"
                         description="MOD_QLCONTENT_ARTICLEID_DESC" >
                 </field>
-                <field name="tags" type="tag" label="JTAG" description="JTAG_DESC" mode="ajax" class="inputbox span12 small" multiple="true" />
                 <field
                         name="categoryid"
                         type="category"
@@ -83,6 +82,7 @@
                         description="MOD_QLCONTENT_CATEGORYID_DESC" >
                     <option value="all">JALL</option>
                 </field>
+                <field name="tags" type="tag" label="JTAG" description="JTAG_DESC" mode="ajax" class="inputbox span12 small" multiple="true" />
                 <field name="default_use"
                        type="radio"
                        class="btn-group"
