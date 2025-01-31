@@ -23,7 +23,7 @@ if (!isset($strField)) {
 ?>
 <div class="<?php echo $strField; ?>">
     <?php if ($arrItem->link_category) {
-        echo sprintf('<a href="%s">', $dataOfItems[$arrItem->id]->catlink);
+        echo sprintf('<a aria-label="%s" href="%s">', htmlspecialchars($arrItem->{$strField}), $dataOfItems[$arrItem->id]->catlink);
     } ?>
     <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>
     <?php if (isset($arrItem->{$strField})) {

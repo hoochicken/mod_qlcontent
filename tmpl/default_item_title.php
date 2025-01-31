@@ -24,7 +24,7 @@ if (!isset($strField)) {
 $strTitleTag = $params->get('titletag', 'h3');
 
 if ($params->get('link_titles')) {
-    echo '<a class="title" href="'.$dataOfItems[$arrItem->id]->link.'">';
+    echo sprintf('<a aria-label="%s" class="title" href="'.$dataOfItems[$arrItem->id]->link.'">', htmlspecialchars($dataOfItems[$arrItem->id]->title));
 } ?>
 <<?php echo $strTitleTag; ?> class="<?php echo $strField; ?>">
 <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>

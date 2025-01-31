@@ -23,7 +23,7 @@ $strTitleTag = $params->get('cattitletag', 'h3');
     <<?php echo $strTitleTag; ?> class="<?php echo $strField; ?>">
     <?php echo $strLabel;
     if ((isset($arrItem->link_category) && 1 == $arrItem->link_category) || 'category' === $helper->type) {
-        echo '<a href="'.$dataOfItems[$arrItem->id]->catlink.'">';
+        echo sprintf('<a aria-label="%s" href="'.$dataOfItems[$arrItem->id]->catlink.'">', htmlspecialchars($arrItem->{$strField}));
     }
 
     require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition');

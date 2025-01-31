@@ -9,7 +9,7 @@ use Joomla\CMS\Language\Text;
 
 ?>
 <div class="back">
-    <button onclick="history.back();">
-        <?php echo Text::_('MOD_QLCONTENT_BACK'); ?>
+    <button aria-label="<?= Text::_('MOD_QLCONTENT_BACK'); ?>" onclick="history.back();">
+        <?= Text::_('MOD_QLCONTENT_BACK'); ?>
     </button>
 </div>

@@ -23,6 +23,6 @@ if (!isset($strField)) {
 ?>
 	<div class="<?php echo $strField; ?>">
         <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>
-		<a target="<?php echo $dataOfItems[$arrItem->id]->{$strField.'target'}; ?>" class="<?php echo $dataOfItems[$arrItem->id]->{$strField.'class'}; ?>" rel="<?php echo $dataOfItems[$arrItem->id]->{$strField.'rel'}; ?>" href="<?php echo $arrItem->{$strField}; ?>"><?php echo $dataOfItems[$arrItem->id]->{$strField.'text'}; ?></a>
+		<a aria-label="<?= htmlspecialchars($dataOfItems[$arrItem->id]->title) ?>" target="<?php echo $dataOfItems[$arrItem->id]->{$strField.'target'}; ?>" class="<?php echo $dataOfItems[$arrItem->id]->{$strField.'class'}; ?>" rel="<?php echo $dataOfItems[$arrItem->id]->{$strField.'rel'}; ?>" href="<?php echo $arrItem->{$strField}; ?>"><?php echo $dataOfItems[$arrItem->id]->{$strField.'text'}; ?></a>
 	</div>
 <?php unset($target); ?>

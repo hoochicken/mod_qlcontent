@@ -26,7 +26,9 @@ if ('' != $dataOfItems[$arrItem->id]->fulltext or 1 == $params->get('readmoredis
     <div class="<?php echo $strField; ?>">
         <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>
         <a class="<?php echo $params->get('readmoreClass', 'btn btn-secondary'); ?>"
-           href="<?php echo $dataOfItems[$arrItem->id]->link; ?>">
+           href="<?php echo $dataOfItems[$arrItem->id]->link; ?>"
+           aria-label="<?= htmlspecialchars($dataOfItems[$arrItem->id]->title) ?>"
+        >
             <?php echo Text::_($arrItem->readmore); ?>
         </a>
     </div>
