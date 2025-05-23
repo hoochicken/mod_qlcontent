@@ -9,6 +9,6 @@
 /** @var QlContentErrors $errors */
 ?>
 <div class="alert alert-danger <?php echo $params->get('strErrorClass', ''); ?>">
-    <?php echo $errors->getErrorsAsString(); ?>
+    <?= $errors->getErrorsAsString() ?>
 </div>
 <?php

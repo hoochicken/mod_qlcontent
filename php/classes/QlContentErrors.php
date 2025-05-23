@@ -14,7 +14,7 @@ class QlContentErrors
 
     public function hasErrors(): bool
     {
-        return 0 < $this->errors;
+        return 0 < count($this->errors);
     }
 
     public function getErrors(): array
