@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright      Copyright (C) 2024 ql.de All rights reserved.
+ * @copyright      Copyright (C) 2025 ql.de All rights reserved.
  * @author         Mareike Riegel mareike.riegel@ql.de
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -43,8 +43,9 @@ class modQlcontentHelper
     protected ?DatabaseDriver $bd;
     private stdClass $module;
     private string $order;
+    private QlContentErrors $errors;
 
-    public function __construct($module)
+    public function __construct($module, QlContentErrors $errors)
     {
         $this->db = Factory::getContainer()->get('DatabaseDriver');
         $this->query = $this->db->getQuery(true);
@@ -53,6 +54,7 @@ class modQlcontentHelper
         $registry = new JRegistry();
         $registry->loadString($module->params);
         $this->params = $registry;
+        $this->errors = $errors;
     }
 
     public function autoload()

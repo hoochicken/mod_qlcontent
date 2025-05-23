@@ -6,8 +6,9 @@
  */
 
 /** @var Joomla\Registry\Registry $params */
+/** @var QlContentErrors $errors */
 ?>
-<div class="<?php echo $params->get('strMessageClass', ''); ?>">
-    <?php echo $params->get('strEmptyMessage', ''); ?>
+<div class="alert alert-danger <?php echo $params->get('strErrorClass', ''); ?>">
+    <?php echo $errors->getErrorsAsString(); ?>
 </div>
 <?php
