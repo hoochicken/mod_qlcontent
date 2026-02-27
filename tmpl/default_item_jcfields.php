@@ -7,7 +7,7 @@
 use Joomla\Component\Fields\Administrator\Helper\FieldsHelper;
 
 // no direct access
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -18,7 +18,7 @@ defined('_JEXEC') or exit;
 ?>
 <?php if (isset($strField)) { ?>
     <div class="<?php echo $strField; ?>">
-        <?php foreach ($arrItem->{$strField} as $numKey => $objValue) {
+        <?php foreach ($arrItem->{$strField} as $objValue) {
             echo FieldsHelper::render($objValue->context, 'field.render', ['field' => $objValue]);
         } ?>
     </div>

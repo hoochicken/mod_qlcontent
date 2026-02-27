@@ -18,7 +18,7 @@ use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Registry\Registry;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 jimport('joomla.application.component.model');
 if (!class_exists('ContentHelperRoute')) {
@@ -29,6 +29,8 @@ PluginHelper::importPlugin('content');
 
 class modQlcontentHelper
 {
+    public $db;
+    public $query;
     public const FEATURED_ONLY = 1;
     public const FEATURED_BOTH = 2;
     public const FEATURED_NONE = 0;
@@ -40,19 +42,17 @@ class modQlcontentHelper
     protected int $limit;
     protected string $state;
     protected string $language;
-    protected ?DatabaseDriver $bd;
-    private stdClass $module;
+    protected ?DatabaseDriver $bd = null;
     private string $order;
-    private QlContentErrors $errors;
+    private readonly QlContentErrors $errors;
 
-    public function __construct($module, QlContentErrors $errors)
+    public function __construct(private readonly stdClass $module, QlContentErrors $errors)
     {
         $this->db = Factory::getContainer()->get('DatabaseDriver');
         $this->query = $this->db->getQuery(true);
-        $this->module = $module;
         $this->autoload();
         $registry = new JRegistry();
-        $registry->loadString($module->params);
+        $registry->loadString($this->module->params);
         $this->params = $registry;
         $this->errors = $errors;
     }
@@ -118,7 +118,7 @@ class modQlcontentHelper
 
     public function filterByTags(array $tags)
     {
-        if (empty($tags)) {
+        if ($tags === []) {
             return;
         }
         $this->query->where('id IN(SELECT content_item_id FROM #__contentitem_tag_map WHERE tag_id IN('.implode(',', $tags).'))');
@@ -130,13 +130,11 @@ class modQlcontentHelper
     public function setAccessFilter()
     {
         // Access filter
-        $access = !ComponentHelper::getParams('com_content')->get('show_noauth');
+        ComponentHelper::getParams('com_content')->get('show_noauth');
         $authorised = Access::getAuthorisedViewLevels(Factory::getApplication()->getIdentity()->get('id'));
         if (0 >= count($authorised)) {
             return;
         }
-        $where = '';
-        $whereAccess = [];
         foreach ($authorised as $k => $v) {
             $whereAuthorised[$k] = '`access`=\''.$v.'\'';
         }
@@ -145,16 +143,16 @@ class modQlcontentHelper
 
     public function setLanguage(string $col, ?string $language = null)
     {
-        $this->language = (!empty($language))
-            ? $col.'=\''.$language.'\''
-            : '';
+        $this->language = (in_array($language, [null, '', '0'], true))
+            ? ''
+            : $col.'=\''.$language.'\'';
     }
 
     public function setOrderBy(string $orderBy, string $orderDirection = 'ASC')
     {
-        $this->order = !empty($orderBy)
-            ? $orderBy.' '.strtoupper($orderDirection)
-            : '';
+        $this->order = $orderBy === '' || $orderBy === '0'
+            ? ''
+            : $orderBy.' '.strtoupper($orderDirection);
     }
 
     public function getArticle(int $id): array
@@ -219,14 +217,15 @@ class modQlcontentHelper
     {
         $arrItems = $this->getDataCategory($ids);
         $arrItems2 = [];
-        foreach ($arrItems as $k => $v) {
+        foreach ($arrItems as $v) {
             $v = $this->addSlugItem($v, 'category');
             $v = $this->addJson($v, 'params');
             $arrItems2[] = $v;
         }
-        if (isset($arrItems2) and 0 < count($arrItems2)) {
+        if (0 < count($arrItems2)) {
             return $arrItems2;
         }
+        return null;
     }
 
     /**
@@ -253,13 +252,13 @@ class modQlcontentHelper
         $this->query->from('`#__categories` AS cat,`#__users` AS us');
         $this->query->where($where);
         $this->query->where('us.id=cat.created_user_id');
-        if ('' != $this->language) {
+        if ('' !== $this->language) {
             $this->query->where($this->language);
         }
-        if ('' != $this->order) {
+        if ('' !== $this->order) {
             $this->query->order($this->order);
         }
-        if ('' != $this->limit) {
+        if (0 !== $this->limit) {
             $this->query->setLimit($this->limit);
         }
         if (is_array($arrItems = $this->askDb())) {
@@ -285,7 +284,7 @@ class modQlcontentHelper
         $this->query->select('con.id');
         $this->query->from('#__content AS con');
         $this->setAddendum();
-        if ('' != $this->limit) {
+        if (0 !== $this->limit) {
             $this->query->setLimit($this->limit);
         }
         $arrItems = $this->askDb();
@@ -317,8 +316,8 @@ class modQlcontentHelper
 
     public function urlBehavior(stdClass $item): stdClass
     {
-        foreach (range('a', 'c') as $k => $v) {
-            if (isset($item->{'url'.$v}) and isset($item->{'target'.$v})) {
+        foreach (range('a', 'c') as $v) {
+            if (isset($item->{'url'.$v}) && isset($item->{'target'.$v})) {
                 switch ($item->{'target'.$v}) {
                     case 1:
                     case 2:
@@ -416,7 +415,7 @@ class modQlcontentHelper
 
         $dispatcher = Factory::getApplication()->getDispatcher();
         $event = new ContentPrepareEvent('onContentPrepare', $arrParamsDispatcher);
-        $res = $dispatcher->dispatch('onCheckAnswer', $event);
+        $dispatcher->dispatch('onCheckAnswer', $event);
 
         $item->introtext = $item->text;
         if (isset($item->description)) {
@@ -457,19 +456,19 @@ class modQlcontentHelper
     protected function setAddendum(int $featured = self::FEATURED_ONLY)
     {
         $this->setAccessFilter();
-        if (static::FEATURED_ONLY === $featured && !empty($this->featured)) {
+        if (static::FEATURED_ONLY === $featured && (isset($this->featured) && ($this->featured !== '' && $this->featured !== '0'))) {
             $this->query->where($this->featured);
         }
-        if (!empty($this->language)) {
+        if (isset($this->language) && ($this->language !== '' && $this->language !== '0')) {
             $this->query->where($this->language);
         }
-        if (!empty($this->state)) {
+        if (isset($this->state) && ($this->state !== '' && $this->state !== '0')) {
             $this->query->where($this->state);
         }
-        if (!empty($this->order)) {
+        if (isset($this->order) && ($this->order !== '' && $this->order !== '0')) {
             $this->query->order($this->order);
         }
-        if (!empty($this->limit)) {
+        if (isset($this->limit) && $this->limit !== 0) {
             $this->query->setLimit($this->limit);
         }
     }

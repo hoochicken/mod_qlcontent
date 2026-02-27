@@ -16,10 +16,10 @@ defined('_JEXEC') || exit;
 
 /** @var Registry $params */
 /** @var stdClass $module */
-require_once dirname(__FILE__) . '/php/classes/QlContentErrors.php';
+require_once __DIR__ . '/php/classes/QlContentErrors.php';
 $errors = new QlContentErrors();
 // Include the syndicate functions only once
-require_once dirname(__FILE__) . '/helper.php';
+require_once __DIR__ . '/helper.php';
 $helper = new modQlcontentHelper($module, $errors);
 
 try {
@@ -52,8 +52,8 @@ try {
     }
     if (39 >= $todo) {
         $helper->type = 'article';
-        $helper->setSelectState('con.state', $params->get('state'), 1);
-        $helper->setFeatured('con.featured', $featured, 0);
+        $helper->setSelectState('con.state', $params->get('state'));
+        $helper->setFeatured('con.featured', $featured);
         $helper->setLanguage('con.language', $params->get('languageFilter'));
         $helper->setOrderBy($params->get('ordering'), $params->get('orderingdirection'));
         $helper->setLimit($limitForQuery);
@@ -104,7 +104,7 @@ try {
                     $helper->type = 'article';
                 } else {
                     $catid = [0 => $helper->getCurrentCategory('id')];
-                    if (count($catid) <= 0 || empty($catid[0])) {
+                    if (empty($catid[0])) {
                         $catid = $params->get('categoryid');
                     }
                     $arrItems = $helper->getCategory($catid);
@@ -124,7 +124,7 @@ try {
 
         // article:: current article; if none, show fix article
         case 17:
-            $id = $helper->getCurrentArticle('id', 0);
+            $id = $helper->getCurrentArticle('id');
             if (empty($id)) {
                 $id = $params->get('articleid');
             }
@@ -185,7 +185,7 @@ try {
         case 41:
             $arrCatid = [0 => $helper->getCurrentArticle('catid')];
             $arrCatid = array_filter($arrCatid);
-            if (empty($arrCatid)) {
+            if ($arrCatid === []) {
                 $arrCatid = [0 => $helper->getCurrentCategory('id')];
             }
             $arrCatid = array_filter($arrCatid);
@@ -216,7 +216,7 @@ try {
                 $helper->type = 'article';
             } else {
                 $catid = [0 => $helper->getCurrentCategory('id')];
-                if (count($catid) <= 0 || '' == $catid[0]) {
+                if ('' == $catid[0]) {
                     $catid = $params->get('categoryid');
                 }
                 $arrItems = $helper->getCategory($catid);
@@ -228,7 +228,7 @@ try {
         case 47:
             $catid = $params->get('categoryid', 0);
             $ids = $helper->getCategoryChildren($catid);
-            foreach ($ids as $k => $v) {
+            foreach ($ids as $v) {
                 $arr_id[] = $v->id;
             }
             if (isset($arr_id)) {
@@ -245,10 +245,8 @@ try {
                 $catid = [0 => $helper->getCurrentCategory('id')];
             }
             $ids = $helper->getCategoryChildren($catid);
-            if (isset($ids) && is_array($ids) && count($ids) > 0) {
-                foreach ($ids as $k => $v) {
-                    $arr_id[] = $v->id;
-                }
+            foreach ($ids as $v) {
+                $arr_id[] = $v->id;
             }
             if (isset($arr_id) && count($arr_id) > 0) {
                 $arrItems = $helper->getCategory($arr_id);
@@ -267,10 +265,8 @@ try {
                 $catid = $params->get('categoryid');
             }
             $ids = $helper->getCategoryChildren($catid);
-            if (isset($ids) && is_array($ids) && count($ids) > 0) {
-                foreach ($ids as $k => $v) {
-                    $arr_id[] = $v->id;
-                }
+            foreach ($ids as $v) {
+                $arr_id[] = $v->id;
             }
             if (isset($arr_id) && count($arr_id) > 0) {
                 $arrItems = $helper->getCategory($arr_id);
@@ -289,8 +285,8 @@ try {
                 $catid = $params->get('categoryid');
             }
             $ids = $helper->getCategoryChildren($catid);
-            if (isset($ids) && is_array($ids) && count($ids) > 0) {
-                foreach ($ids as $k => $v) {
+            if (count($ids) > 0) {
+                foreach ($ids as $v) {
                     $arr_id[] = $v->id;
                 }
                 if (isset($arr_id) && count($arr_id) > 0) {
@@ -383,13 +379,13 @@ try {
             $arrItemsOrdered[$k]->id = $v->id;
             $dataOfItems[$v->id] = $arrItems[$k];
             if ($params->get('striptags', false) && isset($arrItemsOrdered[$k]->introtext)) {
-                $arrItemsOrdered[$k]->introtext = strip_tags($dataOfItems[$v->id]->introtext);
+                $arrItemsOrdered[$k]->introtext = strip_tags((string) $dataOfItems[$v->id]->introtext);
             }
             if (0 < (int)$params->get('cutintrotext', 0) && isset($arrItemsOrdered[$k]->introtext)) {
                 $arrItemsOrdered[$k]->introtext = $helper->cutString($arrItemsOrdered[$k]->introtext, $params->get('cutintrotext', '0'), $params->get('cutintrotextunit', 'chars'));
             }
             if ($params->get('catstriptags', false) && isset($arrItemsOrdered[$k]->description)) {
-                $arrItemsOrdered[$k]->description = strip_tags($dataOfItems[$v->id]->description);
+                $arrItemsOrdered[$k]->description = strip_tags((string) $dataOfItems[$v->id]->description);
             }
             if (0 < (int)$params->get('catcutintrotext', 0) && isset($arrItemsOrdered[$k]->description)) {
                 $boolCut = (strlen($arrItemsOrdered[$k]->description) > $params->get('catcutintrotextunit', 'chars'));
@@ -409,25 +405,17 @@ try {
     }
 
     if (modQlcontentHelper::FEATURED_PREFERRED === $featured) {
-        $arrItemsIdFeatured = array_filter($dataOfItems, function ($item) {
-            return (bool)($item->featured ?? false);
-        });
+        $arrItemsIdFeatured = array_filter($dataOfItems, fn($item) => (bool)($item->featured ?? false));
         array_walk($arrItemsIdFeatured, function (&$item) {
             $item = $item->id;
         });
-        $arrItemsIdNormalo = array_filter($dataOfItems, function ($item) {
-            return !($item->featured ?? false);
-        });
+        $arrItemsIdNormalo = array_filter($dataOfItems, fn($item) => !($item->featured ?? false));
         array_walk($arrItemsIdNormalo, function (&$item) {
             $item = $item->id;
         });
         $arrItemsOrdered = [
-            ...array_filter($arrItemsOrdered, function ($item) use ($arrItemsIdFeatured) {
-                return in_array($item->id, $arrItemsIdFeatured);
-            }),
-            ...array_filter($arrItemsOrdered, function ($item) use ($arrItemsIdNormalo) {
-                return in_array($item->id, $arrItemsIdNormalo);
-            }),
+            ...array_filter($arrItemsOrdered, fn($item) => in_array($item->id, $arrItemsIdFeatured)),
+            ...array_filter($arrItemsOrdered, fn($item) => in_array($item->id, $arrItemsIdNormalo)),
         ];
         $arrItemsOrdered = array_slice($arrItemsOrdered, 0, $limit);
     }
@@ -438,9 +426,9 @@ try {
             $arrItemsOrdered = $helper->addPagination($arrItemsOrdered, $params);
             $pagination = $helper->pagination;
         }
-        $moduleclass_sfx = !empty($params->get('moduleclass_sfx'))
-            ? htmlspecialchars($params->get('moduleclass_sfx'))
-            : '';
+        $moduleclass_sfx = empty($params->get('moduleclass_sfx'))
+            ? ''
+            : htmlspecialchars((string) $params->get('moduleclass_sfx'));
 
         require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
     } elseif ($params->get('boolEmptyMessage', 0) && isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 === count($arrItems)) {
@@ -449,9 +437,7 @@ try {
 
     // echo '<pre>';print_r($dataOfItems);die;
     unset($arrItemsPerRow, $intPerRow);
-} catch (Error $e) {
-    $errors->setError($e->getMessage());
-} catch (Exception $e) {
+} catch (Error|Exception $e) {
     $errors->setError($e->getMessage());
 }
 

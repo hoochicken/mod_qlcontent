@@ -18,10 +18,10 @@ use Joomla\Registry\Registry;
 $arr_pagination = ['box', 'result', 'pages'];
 foreach ($arr_pagination as $numKey => $strValue) {
     if ($above && in_array((int) $params->get('pagination_'.$strValue.'position'), [1, 3])) {
-        include dirname(__FILE__).'/default_pagination'.ucwords($strValue).'.php';
+        include __DIR__.'/default_pagination'.ucwords($strValue).'.php';
     }
     if ($above && in_array((int) $params->get('pagination_'.$strValue.'position', 0), [2, 3])) {
-        include dirname(__FILE__).'/default_pagination'.ucwords($strValue).'.php';
+        include __DIR__.'/default_pagination'.ucwords($strValue).'.php';
     }
 }
 $above = true;

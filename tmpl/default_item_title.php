@@ -8,7 +8,7 @@
 // no direct access
 use Joomla\CMS\Helper\ModuleHelper;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -24,7 +24,7 @@ if (!isset($strField)) {
 $strTitleTag = $params->get('titletag', 'h3');
 
 if ($params->get('link_titles')) {
-    echo sprintf('<a aria-label="%s" class="title" href="'.$dataOfItems[$arrItem->id]->link.'">', htmlspecialchars($dataOfItems[$arrItem->id]->title));
+    echo sprintf('<a aria-label="%s" class="title" href="'.$dataOfItems[$arrItem->id]->link.'">', htmlspecialchars((string) $dataOfItems[$arrItem->id]->title));
 } ?>
 <<?php echo $strTitleTag; ?> class="<?php echo $strField; ?>">
 <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>

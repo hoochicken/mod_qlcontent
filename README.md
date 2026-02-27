@@ -54,3 +54,8 @@ The following data is available for display of categories:
 
 Deme: https://blackforest-software.com/index.php/en/content-display/qlcontent/demo
 
+## Use rector
+
+~~~shell
+vendor/bin/rector
+~~~

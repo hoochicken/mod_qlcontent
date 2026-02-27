@@ -9,7 +9,7 @@
 use Joomla\CMS\Helper\ModuleHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */

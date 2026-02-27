@@ -8,7 +8,7 @@
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 jimport('joomla.html.html');
 jimport('joomla.form.formfield');
 
@@ -18,20 +18,19 @@ class JFormFieldArticle extends FormField
 
     protected function getInput()
     {
-        $selected = !empty($this->value) ? $this->value : ($this->default ?? false);
+        $selected = empty($this->value) ? $this->default ?? false : ($this->value);
         $options = $this->getOptions($selected);
         $html = '';
         $html .= '<select name="'.$this->name.'" id="'.$this->id.'" class="form-select">';
-        foreach ($options as $k => $v) {
+        foreach ($options as $v) {
             $html .= '<option value="'.$v['value'].'"';
             if ($v['selected']) {
                 $html .= ' selected="selected"';
             }
             $html .= '>'.Text::_($v['label']).'</option>';
         }
-        $html .= '</select>';
 
-        return $html;
+        return $html . '</select>';
     }
 
     private function getOptions($selected)
@@ -65,7 +64,7 @@ class JFormFieldArticle extends FormField
             'selected' => '0' === $selected,
         ];
 
-        foreach ($array as $k => $v) {
+        foreach ($array as $v) {
             $options[$v] = [
                 'label' => 'MOD_QLCONTENT_'.strtoupper($v),
                 'value' => $v,

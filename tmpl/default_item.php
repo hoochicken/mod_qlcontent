@@ -9,7 +9,7 @@
 use Joomla\CMS\Helper\ModuleHelper;
 use Joomla\Registry\Registry;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -29,7 +29,7 @@ foreach ($arrItem as $strField => $v2) {
     }
     $strLabel = '';
     if ($params->get('showlabels')) {
-        $strLabel = preg_replace('/_/', ' ', ucwords($strField)).': ';
+        $strLabel = preg_replace('/_/', ' ', ucwords((string) $strField)).': ';
     }
     if (in_array($strField, $arr_qldate)) {
         require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_date');
@@ -41,12 +41,11 @@ foreach ($arrItem as $strField => $v2) {
         require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_icon');
     } elseif ('edit' == $strField && $helper->checkIfUserAuthorizedEdit()) {
         require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_edit');
-    } elseif ('edit' == $strField) {
     } elseif ('introtext' == $strField) {
         require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_introtext');
     } else {
         $defaultFile = ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_'.$strField);
-        if ('default.php' == substr($defaultFile, -11)) {
+        if (str_ends_with($defaultFile, 'default.php')) {
             require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_default');
         } else {
             require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_'.$strField);

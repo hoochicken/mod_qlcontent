@@ -10,7 +10,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Pagination\Pagination;
 use Joomla\Registry\Registry;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 jimport('joomla.application.component.model');
 
@@ -23,7 +23,7 @@ class modQlcontentPagination extends JModelLegacy
      */
     public function __construct()
     {
-        if (!isset($this->state)) {
+        if ($this->state === null) {
             $this->state = new Registry();
         }
     }
@@ -57,7 +57,7 @@ class modQlcontentPagination extends JModelLegacy
         $limitstart = $input->get('limitstart', 0);
         $this->setState('limitstart', $limitstart);
         $app->getUserStateFromRequest('global.limitstart', 'limitstart', $limitstart);
-        if ('' == $input->get('limit') and '' == $app->getUserStateFromRequest('global.limit', 'limit')) {
+        if ('' == $input->get('limit') && '' == $app->getUserStateFromRequest('global.limit', 'limit')) {
             $app->getUserStateFromRequest('global.limit', 'limit', $default_limit);
             $this->setState('limit', $default_limit);
         } else {

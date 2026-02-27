@@ -9,7 +9,7 @@
 use Joomla\CMS\Helper\ModuleHelper;
 use Joomla\CMS\Language\Text;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -21,13 +21,13 @@ defined('_JEXEC') or exit;
 if (!isset($strField)) {
     return;
 }
-if ('' != $dataOfItems[$arrItem->id]->fulltext or 1 == $params->get('readmoredisplay')) {
+if ('' != $dataOfItems[$arrItem->id]->fulltext || 1 == $params->get('readmoredisplay')) {
     ?>
     <div class="<?php echo $strField; ?>">
         <?php require ModuleHelper::getLayoutPath('mod_qlcontent', 'default_item_showposition'); ?>
         <a class="<?php echo $params->get('readmoreClass', 'btn btn-secondary'); ?>"
            href="<?php echo $dataOfItems[$arrItem->id]->link; ?>"
-           aria-label="<?= htmlspecialchars($dataOfItems[$arrItem->id]->title) ?>"
+           aria-label="<?= htmlspecialchars((string) $dataOfItems[$arrItem->id]->title) ?>"
         >
             <?php echo Text::_($arrItem->readmore); ?>
         </a>

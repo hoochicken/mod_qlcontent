@@ -8,7 +8,7 @@
 // no direct access
 use Joomla\CMS\Helper\ModuleHelper;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -47,7 +47,7 @@ if ('' != $src) {
         <?php if ($params->get('link_titles')) {
             echo '</a>';
         } ?>
-        <?php if ($params->get('showCaption') and isset($caption) and '' != $caption) { ?>
+        <?php if ($params->get('showCaption') && isset($caption) && '' != $caption) { ?>
             <div class="caption"><?php echo $caption; ?></div>
         <?php } ?>
     </div>

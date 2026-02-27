@@ -8,7 +8,7 @@
 // no direct access
 use Joomla\CMS\Helper\ModuleHelper;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */

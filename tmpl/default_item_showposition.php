@@ -7,7 +7,7 @@
  */
 
 // no direct access
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var Joomla\Registry\Registry $params */
 /** @var int $i */

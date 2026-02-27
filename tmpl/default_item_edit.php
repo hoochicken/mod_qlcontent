@@ -16,9 +16,9 @@ use Joomla\CMS\Language\Text;
 /** @var stdClass $arrItem */
 /** @var modQlcontentHelper $helper */
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 $lang = Factory::getLanguage();
-$langTag = substr($lang->get('tag'), 0, 2);
+$langTag = substr((string) $lang->get('tag'), 0, 2);
 ?>
 <div class="icons">
     <div class="btn-group pull-right">

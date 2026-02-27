@@ -8,7 +8,7 @@
 // no direct access
 use Joomla\CMS\Helper\ModuleHelper;
 
-defined('_JEXEC') or exit;
+defined('_JEXEC') || exit;
 
 /** @var string $strTitleTag */
 /** @var Joomla\Registry\Registry $params */
@@ -29,8 +29,8 @@ if (in_array((int) $params->get('dots', 0), [1, 2]) && !empty($dataOfItems[$arrI
     if ($params->get('striptags', false)) {
         $arrItem->{$strField} .= '...';
     } else {
-        $posR = strripos($arrItem->{$strField}, '</p>');
-        $arrItem->{$strField} = substr($arrItem->{$strField}, 0, $posR).'...</p>';
+        $posR = strripos((string) $arrItem->{$strField}, '</p>');
+        $arrItem->{$strField} = substr((string) $arrItem->{$strField}, 0, $posR).'...</p>';
         unset($posR);
     }
 }
