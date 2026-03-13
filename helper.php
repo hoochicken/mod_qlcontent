@@ -10,6 +10,7 @@ use Joomla\CMS\Access\Access;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Event\Content\ContentPrepareEvent;
 use Joomla\CMS\Factory;
+use Joomla\Component\Content\Site\Helper\RouteHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -21,10 +22,6 @@ use Joomla\Registry\Registry;
 defined('_JEXEC') || exit;
 
 jimport('joomla.application.component.model');
-if (!class_exists('ContentHelperRoute')) {
-    require_once JPATH_SITE.'/components/com_content/helpers/route.php';
-}
-
 PluginHelper::importPlugin('content');
 
 class modQlcontentHelper
@@ -51,7 +48,7 @@ class modQlcontentHelper
         $this->db = Factory::getContainer()->get('DatabaseDriver');
         $this->query = $this->db->getQuery(true);
         $this->autoload();
-        $registry = new JRegistry();
+        $registry = new Registry();
         $registry->loadString($this->module->params);
         $this->params = $registry;
         $this->errors = $errors;
@@ -508,9 +505,9 @@ class modQlcontentHelper
     {
         $item->slug = $item->id.':'.$item->alias;
         if ('article' == $router) {
-            $item->link = Route::_(ContentHelperRoute::getArticleRoute($item->slug, $item->catslug));
+            $item->link = Route::_(RouteHelper::getArticleRoute($item->slug, $item->catslug));
         } elseif ('category' == $router) {
-            $item->link = $item->catlink = Route::_(ContentHelperRoute::getCategoryRoute($item->slug));
+            $item->link = $item->catlink = Route::_(RouteHelper::getCategoryRoute($item->slug));
         }
 
         return $item;
@@ -527,7 +524,7 @@ class modQlcontentHelper
     protected function addSlugCategory($item)
     {
         $item->catslug = $item->catid.':'.$item->category_alias;
-        $item->catlink = Route::_(ContentHelperRoute::getCategoryRoute($item->catslug));
+        $item->catlink = Route::_(RouteHelper::getCategoryRoute($item->catslug));
 
         return $item;
     }
@@ -537,7 +534,7 @@ class modQlcontentHelper
         $access = !ComponentHelper::getParams('com_content')->get('show_noauth');
         $authorised = Access::getAuthorisedViewLevels(Factory::getApplication()->getIdentity()->getParam('id') ?? 0);
         if ($access || in_array($item->access, $authorised)) {
-            $item->link = Route::_(ContentHelperRoute::getArticleRoute($item->slug, $item->catslug));
+            $item->link = Route::_(RouteHelper::getArticleRoute($item->slug, $item->catslug));
         } else {
             $item->link = Route::_('index.php?option=com_users&view=login');
         }

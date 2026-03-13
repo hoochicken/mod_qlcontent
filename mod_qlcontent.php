@@ -16,13 +16,18 @@ defined('_JEXEC') || exit;
 
 /** @var Registry $params */
 /** @var stdClass $module */
-require_once __DIR__ . '/php/classes/QlContentErrors.php';
-$errors = new QlContentErrors();
-// Include the syndicate functions only once
-require_once __DIR__ . '/helper.php';
-$helper = new modQlcontentHelper($module, $errors);
-
 try {
+    require_once __DIR__ . '/php/classes/QlContentErrors.php';
+    $errors = new QlContentErrors();
+    // Include the syndicate functions only once
+    require_once __DIR__ . '/helper.php';
+    $helper = new modQlcontentHelper($module, $errors);
+    $moduleclass_sfx = empty($params->get('moduleclass_sfx'))
+        ? ''
+        : htmlspecialchars((string) $params->get('moduleclass_sfx'));
+    $arrItemsOrdered = [];
+    $dataOfItems = [];
+
     $id = '';
     $todo = (int)$params->get('todo', 0);
     $isCategoryView = true;
@@ -338,8 +343,6 @@ try {
     }
 
     if (isset($arrItems) && is_array($arrItems)) {
-        $arrItemsOrdered = [];
-        $dataOfItems = [];
         foreach ($arrItems as $k => $v) {
             if (!isset($v->id)) {
                 continue;
@@ -426,10 +429,6 @@ try {
             $arrItemsOrdered = $helper->addPagination($arrItemsOrdered, $params);
             $pagination = $helper->pagination;
         }
-        $moduleclass_sfx = empty($params->get('moduleclass_sfx'))
-            ? ''
-            : htmlspecialchars((string) $params->get('moduleclass_sfx'));
-
         require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default'));
     } elseif ($params->get('boolEmptyMessage', 0) && isset($arrItemsOrdered) && is_array($arrItemsOrdered) && 0 === count($arrItems)) {
         require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_message');
