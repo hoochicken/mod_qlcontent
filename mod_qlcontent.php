@@ -440,6 +440,6 @@ try {
     $errors->setError($e->getMessage());
 }
 
-if ($errors->hasErrors() && 0 === count($arrItems)) {
+if ($errors->hasErrors()) {
     require ModuleHelper::getLayoutPath('mod_qlcontent', $params->get('layout', 'default') . '_error');
 }
